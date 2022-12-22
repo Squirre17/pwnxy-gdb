@@ -2,7 +2,7 @@ from enum import Enum
 from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
                     Iterator, List, NoReturn, Optional, Sequence, Set, Tuple, Type,
                     Union, NewType)
-from gdbinit import __registered_cmds__
+from pwnxy.globals import __registered_cmds__
 import pwnxy.file
 from pwnxy.cmds import (Cmd, register)
 from pwnxy.utils.asserter import (assert_eq, assert_ne, todo)

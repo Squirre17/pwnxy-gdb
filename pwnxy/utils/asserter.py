@@ -2,6 +2,7 @@ from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
                     Iterator, List, NoReturn, Optional, Sequence, Set, Tuple, Type,
                     Union, NewType)
 from pwnxy.utils.output import (info, err, hint, dbg)
+from pwnxy.utils.color import Color
 
 def assert_eq(x : Any, y : Any):
     if x != y:
@@ -16,6 +17,13 @@ def assert_ne(x : Any, y : Any):
 def todo():
     err("Plz impl me")
     exit(1)
+
+# ONLY for decorator
+def debug(func):
+    def inner(*args, **kwargs):
+        print(Color.pinkify("------FOR-DBG-USE------"))
+        func(*args, **kwargs)
+    return inner
 
 NewType("TODO", Dict[int, Tuple[int, Sequence]])
     

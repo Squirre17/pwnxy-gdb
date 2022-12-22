@@ -66,7 +66,7 @@ if lines_tmp is not None:
 for ln in lines:
     dbg(ln)
 
-dbg("-------------------------------------")
+dbg("--------------DBG-TEST-----------------")
 dbg("prefix with `0x` => %#x" % 123)
 dbg(gdb.parse_and_eval("1+1"))
 dbg(gdb.parse_and_eval("$PC"))
@@ -77,4 +77,7 @@ from pwnxy.cmds.aslr import aslr
 aslr()
 assert_eq(b"a\n".strip(), b"a")
 dbg(int(b"1"))
+
+from pwnxy.cmds import show_registered_cmds
+show_registered_cmds()
 # ------ ---------- ------

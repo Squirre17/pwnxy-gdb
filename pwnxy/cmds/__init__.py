@@ -1,9 +1,9 @@
 from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
                     Iterator, List, NoReturn, Optional, Sequence, Set, Tuple, Type,
                     Union, NewType)
-from pwnxy.utils.asserter import (assert_eq, assert_ne, todo)
+from pwnxy.utils.asserter import (assert_eq, assert_ne, todo, debug)
 from pwnxy.utils.output import (info, err, hint, dbg)
-
+# import pwnxy.globals
 try:
     import gdb
 except ModuleNotFoundError:
@@ -11,6 +11,8 @@ except ModuleNotFoundError:
 
 cmds : List[Type["Cmd"]] = []
 cmds_name : Set[str] = set()
+
+__registered_cmds__ : Set[Type["Cmd"]] = set()
 
 '''APIs:
 gdb.execute (command [, from_tty [, to_string]]) ->  str | None
@@ -102,7 +104,6 @@ def gdb_parse(s : str):
     
 # TODO: Maybe have register function
 def register(cls: Type["Cmd"]) -> Type[Cmd] :
-    global __registered_cmds__
 
     assert(issubclass(cls, Cmd))
     assert(hasattr(cls, "do_invoke"))
@@ -110,5 +111,9 @@ def register(cls: Type["Cmd"]) -> Type[Cmd] :
     __registered_cmds__.add(cls)
     return cls
 
-
+@debug
+def show_registered_cmds():
+    dbg("\tstart show_registered_cmds")
+    for i in __registered_cmds__:
+        dbg(f"{i}")
 
