@@ -1,0 +1,5 @@
+.mypy_cache
+tmp
+__pycache__
+.gdb_history
+
