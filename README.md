@@ -9,3 +9,4 @@ set PHTYONPATH (maybe can in gdbinit.py?...)
 - [ ] more cmds
 - [ ] use global var in other file
 - [ ] complete subclass function invoke
+- [ ] add runtime error

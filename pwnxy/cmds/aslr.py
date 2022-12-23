@@ -5,7 +5,7 @@ from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
 from pwnxy.globals import __registered_cmds__
 import pwnxy.file
 from pwnxy.cmds import (Cmd, register)
-from pwnxy.utils.asserter import (assert_eq, assert_ne, todo)
+from pwnxy.utils.debugger import (unwrap, assert_eq, assert_ne, todo)
 from pwnxy.utils.output import (xy_print, info, err, hint, dbg)
 from pwnxy.utils.color import Color
 # from pwnxy.file import (get)
@@ -19,9 +19,10 @@ except ModuleNotFoundError:
 
 def check_aslr() -> Tuple[str ,str]:
     aslr_path = "/proc/sys/kernel/randomize_va_space"
-    ctnt : Optional[ByteString] = pwnxy.file.get(aslr_path)
-    if ctnt is None:
-        err("check aslr failed")
+    ctnt : bytes = unwrap(
+        pwnxy.file.get(aslr_path),
+        lambda : err("check aslr failed")
+    )
     ctnt = ctnt.strip() # striped trailing \n
 
     dbg(b"aslr content is " + ctnt)

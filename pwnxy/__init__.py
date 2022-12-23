@@ -12,7 +12,7 @@ class fake_gdb:
             """
 # NOTE: remember specify PYTHONPATH
 from pwnxy.utils.output import (info, err, hint, dbg)
-from pwnxy.utils.asserter import (assert_eq, assert_ne)
+from pwnxy.utils.debugger import (assert_eq, assert_ne)
 
 try:
     import gdb
@@ -67,9 +67,9 @@ for ln in lines:
     dbg(ln)
 
 dbg("--------------DBG-TEST-----------------")
+gdb.execute("start")
 dbg("prefix with `0x` => %#x" % 123)
 dbg(gdb.parse_and_eval("1+1"))
-dbg(gdb.parse_and_eval("$PC"))
 
 assert_ne(b'', None)
 
@@ -77,6 +77,9 @@ from pwnxy.cmds.aslr import aslr
 aslr()
 assert_eq(b"a\n".strip(), b"a")
 dbg(int(b"1"))
+
+from pwnxy.cmds.vmmap import vmmap
+vmmap()
 
 from pwnxy.cmds import show_registered_cmds
 show_registered_cmds()

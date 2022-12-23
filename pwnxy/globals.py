@@ -1,3 +1,6 @@
+'''globals.py
+for store all global variables
+'''
 from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
                     Iterator, List, NoReturn, Optional, Sequence, Set, Tuple, Type,
                     Union, NewType)

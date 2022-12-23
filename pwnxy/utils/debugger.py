@@ -25,6 +25,13 @@ def debug(func):
         func(*args, **kwargs)
     return inner
 
+def unwrap(oa : Optional[Any], fn : Callable = lambda : ...) -> Any:
+    if oa is None:
+        return fn()
+    else:
+        oa_inner : Any = oa
+        return oa_inner
+
 NewType("TODO", Dict[int, Tuple[int, Sequence]])
     
 if __name__ == "__main__":
