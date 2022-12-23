@@ -1,6 +1,16 @@
+from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
+                    Iterator, List, NoReturn, Optional, Sequence, Set, Tuple, Type,
+                    Union, NewType)
 
+from pwnxy.globals import __registered_cmds__
+import pwnxy.file
+import pwnxy.memory
+from pwnxy.cmds import (Cmd, register)
+from pwnxy.utils.debugger import (unwrap, assert_eq, assert_ne, todo)
+from pwnxy.utils.output import (xy_print, info, err, hint, dbg)
+from pwnxy.utils.color import Color
 
-
+import gdb
 
 
 class Page:
@@ -42,27 +52,52 @@ class Page:
         return self.__path
     
     @property
-    def can_read() -> bool :
+    def can_read(self) -> bool :
         return self.__rwx[0]
     
     @property
-    def can_write() -> bool :
+    def can_write(self) -> bool :
         return self.__rwx[1]
     
     @property
-    def can_exec() -> bool :
+    def can_exec(self) -> bool :
         return self.__rwx[2]
-    
-    def perm_str() -> str :
+
+    @property
+    def perm_str(self) -> str :
         assert self.__rwx
 
-        return .join([
+        return ''.join([
             'r' if self.__rwx[0] else '-',
             'w' if self.__rwx[1] else '-',
             'x' if self.__rwx[2] else '-',
         ])# omit 'p' ,seemings like no use
 
     def __str__(self) -> str:
+        # TODO: considering heap
+        # Colorify each page line
+
+        color = None
+        if self.can_exec :
+            color = "red"
+
+        dbg(f" path type is {type(self.path)}")
+        if "stack" in self.path:
+            color = "purple"
+
+        return Color.colorify(" ".join(
+            list(map(
+                lambda addr : self.fmt_addr(addr),
+                [ self.start, self.end, self.offset ] 
+            ))+ [ "{:<4s}{}".format(self.perm_str, self.path) ]
+        ), color)
+
+    def fmt_addr(self, addr : int):
+        # format to 0xffffffffffffffff
+        # TODO: current only considering 64-bit
+        return f"0x{addr:016x}"
+        
+        
         
         
 

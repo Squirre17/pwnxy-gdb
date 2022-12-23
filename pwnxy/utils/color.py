@@ -1,3 +1,4 @@
+from typing import Optional
 class Color:
     """Used to colorify terminal output."""
     colors = {
@@ -8,7 +9,7 @@ class Color:
         "green"          : "\033[32m",
         "yellow"         : "\033[33m",
         "blue"           : "\033[34m",
-        "pink"           : "\033[35m",
+        "purple"         : "\033[35m",
         # "cyan"           : "\033[36m",
         # "bold"           : "\033[1m",
         # "underline"      : "\033[4m",
@@ -31,10 +32,12 @@ class Color:
     @staticmethod
     def light_grayify(msg: str) -> str: return Color.colorify(msg, "light_gray")
     @staticmethod
-    def pinkify(msg: str) -> str:       return Color.colorify(msg, "pink")
+    def purpleify(msg: str) -> str:       return Color.colorify(msg, "purple")
 
     @staticmethod
-    def colorify(msg : str , color_key : str) -> str:
+    def colorify(msg : str , color_key : str = "reset") -> str:
+        if color_key == '' or color_key == None:
+            color_key = "reset"
         return Color.colors[color_key] + msg + Color.colors["reset"]
     
 

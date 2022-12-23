@@ -21,7 +21,7 @@ def todo():
 # ONLY for decorator
 def debug(func):
     def inner(*args, **kwargs):
-        print(Color.pinkify("------FOR-DBG-USE------"))
+        print(Color.purpleify("------FOR-DBG-USE------"))
         func(*args, **kwargs)
     return inner
 

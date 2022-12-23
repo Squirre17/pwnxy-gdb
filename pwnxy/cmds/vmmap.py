@@ -3,12 +3,13 @@ from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
                     Iterator, List, NoReturn, Optional, Sequence, Set, Tuple, Type,
                     Union, NewType)
 from pwnxy.globals import __registered_cmds__
-import pwnxy.file as file
+import pwnxy.file
+import pwnxy.memory
 from pwnxy.cmds import (Cmd, register)
 from pwnxy.utils.debugger import (unwrap, assert_eq, assert_ne, todo)
 from pwnxy.utils.output import (xy_print, info, err, hint, dbg)
 from pwnxy.utils.color import Color
-
+from pwnxy.memory import Page
 import gdb
 '''GDB API
 Programs which are being run under GDB are called inferiors
@@ -29,7 +30,7 @@ def vmmap():
     vmmap_path = '/proc/%s/maps' % pid
     dbg(f"pid is {int(pid)}")
 
-    data : ByteString = unwrap(file.get(vmmap_path))
+    data : ByteString = unwrap(pwnxy.file.get(vmmap_path))
     # if data_tmp is None:
     #     err("file.get(vmmap_path) failed")
     # data : ByteString = data_tmp
@@ -59,20 +60,33 @@ def vmmap():
     '''
 
     for ln in lines:
-        xy_print(ln)
+        # TODO: understand dev and inode 
+        # dev => master:slave dev number
+        # inode => TODO:
+        # NOTE: can have some lines missing path
+        maps, perm, offset, dev, inode_path = ln.split(None ,4)
+        inode_path = inode_path.split()
+        if len(inode_path) == 1:
+            path = ''
+            inode = inode_path[0]
+        else:
+            inode, path = inode_path[0], inode_path[1]
 
-    # TODO: understand dev and inode 
-    # dev => master:slave dev number
-    # inode => TODO:
-    maps, perm, offset, dev, inode, path = lines[0].split(None, 5)
-    dbg(f"maps is {maps}")
-    dbg(f"perm is {perm}")
-    dbg(f"offset is {offset}")
-    dbg(f"dev is {dev}")
-    dbg(f"inode is {inode}")
-    dbg(f"path is {path}")
+        dbg(f"perm is {perm}")
+        flag : int = 0
+        if 'r' in perm : flag |= 4
+        if 'w' in perm : flag |= 2
+        if 'x' in perm : flag |= 1
 
-    start, end = maps.split('-')
+        start, end = maps.split('-')
+        start  = int(start, 16)
+        end    = int(end, 16)
+        offset = int(offset, 16)
+        dbg(f"path is {path}")
+        page : Type["Page"] = pwnxy.memory.Page(start, end, flag, offset, path)
+        dbg("page is " + str(page))
+
+
 
     
 
