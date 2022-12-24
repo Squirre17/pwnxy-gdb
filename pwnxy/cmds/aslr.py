@@ -8,7 +8,6 @@ from pwnxy.cmds import (Cmd, register)
 from pwnxy.utils.debugger import (unwrap, assert_eq, assert_ne, todo)
 from pwnxy.utils.output import (xy_print, info, err, hint, dbg)
 from pwnxy.utils.color import Color
-# from pwnxy.file import (get)
 
 try:
     import gdb

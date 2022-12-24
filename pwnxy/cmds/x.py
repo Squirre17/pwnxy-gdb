@@ -61,12 +61,12 @@ class BX(X):
         # assert len(args) == 1 or len(args) == 2
 
         argv = args.split()
-        'bx 0x400000 4 => x/4gx 0x400000'
+        'bx 0x400000 4 => x/4bx 0x400000'
         if len(argv) == 0 :
             err("too few arguments") # TODO ERR type
             return 
         elif len(argv) == 1 :
-            num = "10"      # default value
+            num = "32"      # default value
         elif len(argv) == 2 :
             num = argv[1]
         elif len(argv) == 3 :
@@ -74,7 +74,7 @@ class BX(X):
             return 
 
 
-        cmd = f"x/{num}bx {argv[0]}"
+        cmd = f"x/{num}{self.cmdname} {argv[0]}"
         dbg(cmd)
         gdb.execute(cmd)
     
@@ -82,6 +82,106 @@ class BX(X):
         xy_print("bx usage : `bx 0x400000 4`\n"
                  "           get one byte from given addr 4 times")
 
+@register
+class HX(X):
+    cmdname = "hx"
 
+    def __init__(self) : 
+        super().__init__(self.cmdname)
+
+    def do_invoke(self, args : List[str]) -> None : 
+        self.invoke(args)
+
+    # TODO: modify  all args ,not List[str], but str
+    def invoke(self, args : str, from_tty : bool = False) -> None : 
+        # assert len(args) == 1 or len(args) == 2
+
+        argv = args.split()
+        'hx 0x400000 4 => x/4hx 0x400000'
+        if len(argv) == 0 :
+            err("too few arguments") # TODO ERR type
+            return 
+        elif len(argv) == 1 :
+            num = "16"      # default value
+        elif len(argv) == 2 :
+            num = argv[1]
+        elif len(argv) == 3 :
+            err("too much arguments") # TODO ERR type
+            return 
+
+        cmd = f"x/{num}{self.cmdname} {argv[0]}"
+        dbg(cmd)
+        gdb.execute(cmd)
+    
+    def __usage__(self):
+        xy_print("hx usage : `hx 0x400000 4`\n"
+                 "           get two bytes from given addr 4 times")
         
+@register
+class WX(X):
+    cmdname = "wx"
+
+    def __init__(self) : 
+        super().__init__(self.cmdname)
+
+    def do_invoke(self, args : List[str]) -> None : 
+        self.invoke(args)
+
+    # TODO: modify  all args ,not List[str], but str
+    def invoke(self, args : str, from_tty : bool = False) -> None : 
+
+        argv = args.split()
+        'wx 0x400000 4 => x/4wx 0x400000'
+        if len(argv) == 0 :
+            err("too few arguments") # TODO ERR type
+            return 
+        elif len(argv) == 1 :
+            num = "8"      # default value
+        elif len(argv) == 2 :
+            num = argv[1]
+        elif len(argv) == 3 :
+            err("too much arguments") # TODO ERR type
+            return 
+
+        cmd = f"x/{num}{self.cmdname} {argv[0]}"
+        dbg(cmd)
+        gdb.execute(cmd)
+    
+    def __usage__(self):
+        xy_print("wx usage : `wx 0x400000 4`\n"
+                 "           get four bytes from given addr 4 times")
+
+@register
+class GX(X):
+    cmdname = "gx"
+
+    def __init__(self) : 
+        super().__init__(self.cmdname)
+
+    def do_invoke(self, args : List[str]) -> None : 
+        self.invoke(args)
+
+    # TODO: modify  all args ,not List[str], but str
+    def invoke(self, args : str, from_tty : bool = False) -> None : 
+
+        argv = args.split()
+        'gx 0x400000 4 => x/4gx 0x400000'
+        if len(argv) == 0 :
+            err("too few arguments") # TODO ERR type
+            return 
+        elif len(argv) == 1 :
+            num = "4"      # default value
+        elif len(argv) == 2 :
+            num = argv[1]
+        elif len(argv) == 3 :
+            err("too much arguments") # TODO ERR type
+            return 
+
+        cmd = f"x/{num}{self.cmdname} {argv[0]}"
+        dbg(cmd)
+        gdb.execute(cmd)
+    
+    def __usage__(self):
+        xy_print("gx usage : `gx 0x400000 4`\n"
+                 "           get eight bytes from given addr 4 times")
 

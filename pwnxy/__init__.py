@@ -50,6 +50,10 @@ for cmd in pre_exec_cmds.strip().splitlines():
     gdb.execute(cmd)
     info(f"gdb executed `{cmd}`")
 
+from pwnxy.config import PWNXY_PROMPT
+# TODO: temporary to choice
+gdb.execute(f"set prompt {PWNXY_PROMPT[0]}")
+
 # TODO: maybe sometime can't disasm to intel format ?
 try:
     gdb.execute("set disassembly-flavor intel")
@@ -93,3 +97,17 @@ show_registered_cmds()
 pcmd = PwnxyCmd()
 pcmd.__inst_all__()
 # ------ ---------- ------
+
+# WARN: asdasdasd
+
+# TODO: asdasdasd
+
+# FIXME: asdasdasd
+
+# REVIEW:
+
+# HACK:
+
+# TEMP:
+
+# NOTE: 

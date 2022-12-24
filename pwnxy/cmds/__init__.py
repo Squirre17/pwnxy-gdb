@@ -101,7 +101,6 @@ class Cmd(gdb.Command):
             # TODO:
 
 class PwnxyCmd:
-    # BUG: no cls in __registered_cmds_cls__
     # TODO: Maybe load task delegate top Cmd class??
     # NOTE: instantiate all registered class
     def __inst_all__(self):
@@ -131,7 +130,7 @@ def gdb_parse(s : str):
 def register(cls: Type["Cmd"]) -> Type[Cmd] :
     dbg(f"{cls} registered")
     assert(issubclass(cls, Cmd))
-    assert(hasattr(cls, "do_invoke"))
+    assert(hasattr(cls, "invoke"))
     assert(hasattr(cls, "cmdname"))
     assert(all(map(lambda x: x.cmdname != cls.cmdname, __registered_cmds_cls__)))
     __registered_cmds_cls__.add(cls)
@@ -143,3 +142,4 @@ def show_registered_cmds():
     for i in __registered_cmds_cls__:
         dbg(f"{i}")
 
+# FIXME: HACK:
