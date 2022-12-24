@@ -12,7 +12,7 @@ except ModuleNotFoundError:
 cmds : List[Type["Cmd"]] = []
 cmds_name : Set[str] = set()
 
-__registered_cmds__ : Set[Type["Cmd"]] = set()
+__registered_cmds_cls__ : Set[Type["Cmd"]] = set()
 
 '''APIs:
 gdb.execute (command [, from_tty [, to_string]]) ->  str | None
@@ -25,10 +25,18 @@ gdb.execute (command [, from_tty [, to_string]]) ->  str | None
 '''
 class Cmd(gdb.Command):
     builtin_override_whitelist = {'up', 'down', 'search', 'pwd', 'start'} # TODO: 
-    def __init__(self ,todo : Any):
+    def __init__(self ,cmdline : str):
+        dbg("cmd __init__, str is %s" % cmdline)
         # TODO: super gdb cmd init
-        todo()
+        super().__init__(cmdline, gdb.COMMAND_USER) # TODO:
+        # TODO:
     # TODO: return type use?
+    def __usage__(self) -> None:
+        # TODO:
+        ...
+    def __init_subclass__(cls) -> None:
+        return super().__init_subclass__()
+
     def split_args(self, arguline : str) -> List[str]:
         '''
             Split a command-line string from the user into arguments.
@@ -92,6 +100,23 @@ class Cmd(gdb.Command):
             ...
             # TODO:
 
+class PwnxyCmd:
+    # BUG: no cls in __registered_cmds_cls__
+    # TODO: Maybe load task delegate top Cmd class??
+    # NOTE: instantiate all registered class
+    def __inst_all__(self):
+        '''
+        Load all cmd to gdb
+        '''
+        dbg("start instantiate all cmds")
+        args = []
+        dbg(f"__registered_cmds_cls__ is {__registered_cmds_cls__}")
+        for rcc in __registered_cmds_cls__:
+            rcc_inst = rcc()
+
+
+
+
 # TODO: seemings sloppy : This function should be used as ``argparse.ArgumentParser`` .add_argument method's `type` helper
 def gdb_parse(s : str):
     _mask = 0xffffffffffffffff
@@ -104,16 +129,17 @@ def gdb_parse(s : str):
     
 # TODO: Maybe have register function
 def register(cls: Type["Cmd"]) -> Type[Cmd] :
-
+    dbg(f"{cls} registered")
     assert(issubclass(cls, Cmd))
     assert(hasattr(cls, "do_invoke"))
     assert(hasattr(cls, "cmdname"))
-    __registered_cmds__.add(cls)
+    assert(all(map(lambda x: x.cmdname != cls.cmdname, __registered_cmds_cls__)))
+    __registered_cmds_cls__.add(cls)
     return cls
 
 @debug
 def show_registered_cmds():
     dbg("\tstart show_registered_cmds")
-    for i in __registered_cmds__:
+    for i in __registered_cmds_cls__:
         dbg(f"{i}")
 

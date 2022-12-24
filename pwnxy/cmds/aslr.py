@@ -2,7 +2,7 @@ from enum import Enum
 from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
                     Iterator, List, NoReturn, Optional, Sequence, Set, Tuple, Type,
                     Union, NewType)
-from pwnxy.globals import __registered_cmds__
+from pwnxy.globals import __registered_cmds_cls__
 import pwnxy.file
 from pwnxy.cmds import (Cmd, register)
 from pwnxy.utils.debugger import (unwrap, assert_eq, assert_ne, todo)
@@ -40,12 +40,27 @@ def aslr():
     xy_print(f"ASLR is ({status}), {retstr}")
 
 @register
-class ASLRCmd(Cmd):
+class AslrCmd(Cmd):
     cmdname = "aslr"
     
+    def __init__(self) :
+        super().__init__(self.cmdname)
+        ...
+
+    # def __new__(cls: Type["AslrCmd"]) -> Type["AslrCmd"]:
+    #     return super().__new__()
+
     # TODO: what's args
     def do_invoke(self, args : List[str]) -> None:
         argc = len(args)
+        aslr()
+    # TODO: 
+    def invoke(self, args : List[str], from_tty : bool = False) -> None:
+        self.do_invoke(args)
 
-    ...
     # TODO:
+    def __usage__(self) -> None:
+        return super().__usage__()
+    
+    # TODO:
+    ...

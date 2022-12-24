@@ -1,8 +1,11 @@
+'''
+memory peek poke operations, 
+'''
 from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
                     Iterator, List, NoReturn, Optional, Sequence, Set, Tuple, Type,
                     Union, NewType)
 
-from pwnxy.globals import __registered_cmds__
+from pwnxy.globals import __registered_cmds_cls__
 import pwnxy.file
 import pwnxy.memory
 from pwnxy.cmds import (Cmd, register)
@@ -12,6 +15,56 @@ from pwnxy.utils.color import Color
 
 import gdb
 
+def read(addr : int, size : int) -> bytearray :
+    assert size > 0 and size <= 8, "size error"
+    try :
+        val : memoryview = gdb.selected_inferior().read_memory(addr, size)
+    except Exception as e :
+        raise e
+    return bytearray(val)
+
+# TODO: gdbtype became a enum
+'''GDB API
+    Value.cast (type): hat is the result of casting this instance to the type ,type must be a `gdb.Type` object. 
+    Value.dereference(): get content of given addr
+'''
+def read_by_type(addr, gdb_type) -> int:
+    value = gdb.Value(addr)
+    try:
+        value = value.cast(gdb_type)
+    except gdb.error as e:
+        raise e
+    
+    return int(value.dereference())
+
+def write(addr : int, size : int, value : Union[int, str, bytes]) -> None :
+    assert size > 0 and size <= 8, "size error"
+    if isinstance(value, int) :
+        # Considering byte order according to arch
+        assert value <= 0xffffffffffffffff
+        data = int.to_bytes(value, byteorder = "little")
+    elif isinstance(value, str) :
+        assert len(value) <= 8
+        data = bytes(value, "utf-8")
+    elif isinstance(value, bytes) :
+        assert len(value) <= 8
+        data = value
+    else :
+        err("TypeError")
+    gdb.selected_inferior().write_memory(addr, data, size)
+
+def peek(addr : int) -> Optional[bytes]:
+    '''
+    read a byte from the given address
+    if can't read, return None
+    '''
+    try    : return read(addr, 1)
+    except : pass
+    return None
+
+# write a bytes
+def poke():
+    ...
 
 class Page:
     '''
@@ -27,9 +80,6 @@ class Page:
         self.__offset : int        = offset
         self.__path   : str        = path
         self.__rwx    : List[bool] = [perm & 4, perm & 2, perm & 1]
-
-        dbg(self.__rwx)
-        
     
     @property
     def start(self) -> int:
@@ -81,7 +131,6 @@ class Page:
         if self.can_exec :
             color = "red"
 
-        dbg(f" path type is {type(self.path)}")
         if "stack" in self.path:
             color = "purple"
 

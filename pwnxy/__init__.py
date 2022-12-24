@@ -14,10 +14,13 @@ class fake_gdb:
 from pwnxy.utils.output import (info, err, hint, dbg)
 from pwnxy.utils.debugger import (assert_eq, assert_ne)
 
-try:
-    import gdb
-except ModuleNotFoundError:
-    hint("import gdb can't be standalon")
+import gdb
+
+# ---- decorator function ----- 
+def only_if_running() -> None:
+    # TODO:
+    ...
+
 # ------ gdb execute cmds in advance ------
 
 pre_exec_cmds = """
@@ -73,14 +76,20 @@ dbg(gdb.parse_and_eval("1+1"))
 
 assert_ne(b'', None)
 
-from pwnxy.cmds.aslr import aslr
-aslr()
-assert_eq(b"a\n".strip(), b"a")
-dbg(int(b"1"))
+# ------- all cmd load by import ------
+import pwnxy.cmds.aslr
+import pwnxy.cmds.vmmap
+import pwnxy.cmds.x
+# -------------------------------------
 
-from pwnxy.cmds.vmmap import vmmap
-vmmap()
+# aslr()
+# assert_eq(b"a\n".strip(), b"a")
+# dbg(int(b"1"))
 
-from pwnxy.cmds import show_registered_cmds
+
+from pwnxy.cmds import show_registered_cmds, PwnxyCmd
 show_registered_cmds()
+
+pcmd = PwnxyCmd()
+pcmd.__inst_all__()
 # ------ ---------- ------

@@ -2,7 +2,7 @@ from enum import Enum
 from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
                     Iterator, List, NoReturn, Optional, Sequence, Set, Tuple, Type,
                     Union, NewType)
-from pwnxy.globals import __registered_cmds__
+from pwnxy.globals import __registered_cmds_cls__
 import pwnxy.file
 import pwnxy.memory
 from pwnxy.cmds import (Cmd, register)
@@ -20,6 +20,7 @@ Python scripts can access information about and manipulate inferiors controlled 
 def vmmap():
 
     # TODO: considering to creat another pid class to get pid
+    # TODO: add legend refer pwndbg
 
     pid = gdb.selected_inferior().pid
     if pid == 0:
@@ -35,8 +36,9 @@ def vmmap():
     #     err("file.get(vmmap_path) failed")
     # data : ByteString = data_tmp
 
-    lines = [line for line in data.decode().split('\n') if line is not '' ]
-    '''
+    lines = [line for line in data.decode().split('\n') if line != '' ]
+
+    cat_vmmap_example = '''
     [XYPRINT] : '00400000-00401000 r--p 00000000 08:20 102905                             /home/squ/prac/a.out'
     [XYPRINT] : '00401000-00402000 r-xp 00001000 08:20 102905                             /home/squ/prac/a.out'
     [XYPRINT] : '00402000-00403000 r--p 00002000 08:20 102905                             /home/squ/prac/a.out'
@@ -59,6 +61,12 @@ def vmmap():
     [XYPRINT] : '7ffffffdd000-7ffffffff000 rw-p 00000000 00:00 0                          [stack]'
     '''
 
+    headers = ["Start", "End", "Offset", "Perm", "Path"]
+    xy_print(
+        Color.blueify(
+            "{:<{w}s}{:<{w}s}{:<{w}s}{:<4s} {:s}"
+                        .format(*headers, w = 19)
+        ))
     for ln in lines:
         # TODO: understand dev and inode 
         # dev => master:slave dev number
@@ -72,7 +80,6 @@ def vmmap():
         else:
             inode, path = inode_path[0], inode_path[1]
 
-        dbg(f"perm is {perm}")
         flag : int = 0
         if 'r' in perm : flag |= 4
         if 'w' in perm : flag |= 2
@@ -82,13 +89,9 @@ def vmmap():
         start  = int(start, 16)
         end    = int(end, 16)
         offset = int(offset, 16)
-        dbg(f"path is {path}")
         page : Type["Page"] = pwnxy.memory.Page(start, end, flag, offset, path)
-        dbg("page is " + str(page))
-
-
-
-    
+        
+        xy_print(page)
 
     '''
     ideal output like gef :
@@ -103,10 +106,16 @@ def vmmap():
 class VmmapCmd(Cmd):
     cmdname = "vmmap"
     
+    def __init__(self) :
+        super().__init__(self.cmdname)
     # TODO: what's args
     def do_invoke(self, args : List[str]) -> None:
         argc = len(args)
-        dbg("TODO:")
+        # TODO:
+        vmmap()
+    # After registered to gdb, type 'cmd' will invoke this function
+    def invoke(self, args : List[str], from_tty : bool = False) -> None :
+        self.do_invoke(args)
 
     ...
     # TODO:

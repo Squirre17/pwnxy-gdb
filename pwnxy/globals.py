@@ -6,7 +6,7 @@ from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
                     Union, NewType)
 from pwnxy.cmds import Cmd
 # ------ GLOBAL REGION ------ 
-__registered_cmds__ : Set[Type["Cmd"]] = set()
+__registered_cmds_cls__ : Set[Type["Cmd"]] = set()
 # ---------  END  -----------
 
 
