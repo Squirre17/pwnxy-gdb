@@ -24,7 +24,6 @@ def check_aslr() -> Tuple[str ,str]:
     )
     ctnt = ctnt.strip() # striped trailing \n
 
-    dbg(b"aslr content is " + ctnt)
     if ctnt == b'0' :
         retstr = "randomize_va_space == 0"
         status = Color.redify("OFF")

@@ -14,7 +14,7 @@ import gdb
 import os
 import termios
 __sym = {
-    "banner"               : "-",
+    "banner"               : "─",
     "left-square-bracket"  : "[",
     "right-square-bracket" : "]",
     "right-arrow"          : "→",
@@ -27,8 +27,8 @@ def banner(title : str) -> str:
     # TEMP: temporary use sketchy algo to gen banner...
     retstr = ""
     for _ in range(num):
-        retstr += "-"
-    return Color.blueify(retstr + TITLE + retstr)
+        retstr += __sym["banner"]
+    return Color.blueify(retstr + TITLE + retstr) + '\n'
 
 def get_window_size() -> Tuple[int ,int]:
     # os.environ.get second argu is default val if first argu can't find

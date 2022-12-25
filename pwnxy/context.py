@@ -11,12 +11,16 @@ from pwnxy.utils.color import Color
 import gdb
 from pwnxy.arch import curarch
 from pwnxy.ui import banner
+from pwnxy.registers import AMD64_REG
 # TODO: only_if_running
 # TODO: context + subcmd like `context bracktrace`
-class Context():
-    ...
+# def disasm_context() -> None: ...
 
-    def disasm_context(self) -> str:
+
+# TODO: add user context specify setting
+class Context:
+    ...
+    def __context_disasm() -> str:
         gdb_frame = gdb.newest_frame()
         gdb_arch = gdb.selected_inferior().architecture()
         pc = int(gdb_frame.pc())
@@ -42,5 +46,47 @@ class Context():
                 flag = False
             fmt_list.append(tmp)
         
-        print(banner("DISASM"))
-        print("".join(fmt_list))
+        return banner("DISASM") + "".join(fmt_list) # with ending '\n' 
+
+    def __context_regs() -> str:
+        result : List[str] = []
+        frame = gdb.newest_frame()
+        for r in AMD64_REG.all_regs:
+            val = int(frame.read_register(r))
+            dbg(f"{r} is {val}")
+            result.append(
+                "{:<4s} ".format(r).upper() + "{:#x}".format(val) + '\n'
+            )
+        return banner("REGS") + "".join(result)
+
+    def __context_code() -> str:
+        ...
+        return ""
+
+    def __context_backtrace() -> str:
+        ...
+        return ""
+
+    def __context_ghidra() -> str:
+        # TODO:
+        ...
+        return ""
+
+    def __context_watchstruct() -> str:
+        ...
+        return ""
+    # NOTE: ordered 
+    context_sections : Dict[str, Callable] = {
+        "regs"   : __context_regs,
+        "disasm" : __context_disasm,
+        "code"   : __context_code,
+        "bt"     : __context_backtrace,
+        "ghidra" : __context_ghidra,
+        "ws"     : __context_watchstruct,
+    }
+    def output_context(self):
+        result = ""
+        for title ,fn in self.context_sections.items():
+            result += fn()
+        print(result, end = "")
+

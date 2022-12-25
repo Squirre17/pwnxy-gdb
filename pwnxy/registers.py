@@ -8,33 +8,39 @@ __all_registers__ : Set[Type["RegCollections"]] = set()
 # TODO: add flags and seg reg
 class RegCollections :
     pc       : str          = None
-    stask    : str          = None # sp
+    stack    : str          = None # sp
     frame    : str          = None # bp
     gprs     : Tuple[str]   = None # General Purpose Registers
     fnrg     : Tuple[str]   = None # function register
     ret      : str          = None # return value register
     arch     : Type["Arch"] = None
+    all_regs : Tuple[str]   = None 
 
     def __init__(self, 
         pc       : str,
-        stask    : str,
+        stack    : str,
         frame    : str,
         gprs     : Tuple[str],
         fnrg     : Tuple[str],
         ret      : str,
         arch     : Type["Arch"]
     ):
-        self.pc    = pc
-        self.stask = stask
-        self.frame = frame
-        self.gprs  = gprs
-        self.fnrg  = fnrg
-        self.ret   = ret
-        self.arch  = arch
+        self.pc       = pc
+        self.stack    = stack
+        self.frame    = frame
+        self.gprs     = gprs
+        self.fnrg     = fnrg
+        self.ret      = ret
+        self.arch     = arch
+        self.all_regs = [pc ,stack ,frame]
+        for r in gprs:
+            self.all_regs.append(r)
+
+
 
 AMD64_REG = RegCollections(
     pc      = "rip",
-    stask   = "rsp",
+    stack   = "rsp",
     frame   = "rbp",
     gprs    = ('rax','rbx','rcx','rdx','rdi','rsi',
                                'r8', 'r9', 'r10','r11','r12',

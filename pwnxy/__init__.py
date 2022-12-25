@@ -105,7 +105,7 @@ get_window_size()
 
 from pwnxy.context import Context
 context = Context()
-context.disasm_context()
+context.output_context()
 # ------ ---------- ------
 
 # WARN: asdasdasd
