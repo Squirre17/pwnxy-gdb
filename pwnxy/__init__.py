@@ -17,6 +17,7 @@ from pwnxy.utils.debugger import (assert_eq, assert_ne)
 import gdb
 
 # ---- decorator function ----- 
+# DEPRE: MV to other!
 def only_if_running() -> None:
     # TODO:
     ...
@@ -95,7 +96,16 @@ from pwnxy.cmds import show_registered_cmds, PwnxyCmd
 show_registered_cmds()
 
 pcmd = PwnxyCmd()
-pcmd.__inst_all__()
+pcmd.__inst_all__() # TODO: maybe can register & instantiate at same time?
+from pwnxy.arch import get_arch
+get_arch()
+
+from pwnxy.ui import get_window_size
+get_window_size()
+
+from pwnxy.context import Context
+context = Context()
+context.disasm_context()
 # ------ ---------- ------
 
 # WARN: asdasdasd
@@ -104,10 +114,12 @@ pcmd.__inst_all__()
 
 # FIXME: asdasdasd
 
-# REVIEW:
+# REF:
 
 # HACK:
 
 # TEMP:
 
 # NOTE: 
+
+# DEPRE: 

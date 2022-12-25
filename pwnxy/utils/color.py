@@ -10,14 +10,14 @@ class Color:
         "yellow"         : "\033[33m",
         "blue"           : "\033[34m",
         "purple"         : "\033[35m",
-        # "cyan"           : "\033[36m",
-        # "bold"           : "\033[1m",
-        # "underline"      : "\033[4m",
-        # "underline_off"  : "\033[24m",
-        # "highlight"      : "\033[3m",
-        # "highlight_off"  : "\033[23m",
-        # "blink"          : "\033[5m",
-        # "blink_off"      : "\033[25m",
+        "cyan"           : "\033[36m",
+        "bold"           : "\033[1m",
+        "underline"      : "\033[4m",
+        "underline_off"  : "\033[24m",
+        "highlight"      : "\033[3m",
+        "highlight_off"  : "\033[23m",
+        "blink"          : "\033[5m",
+        "blink_off"      : "\033[25m",
     }
     @staticmethod
     def redify(msg: str) -> str:        return Color.colorify(msg, "red")
@@ -32,7 +32,19 @@ class Color:
     @staticmethod
     def light_grayify(msg: str) -> str: return Color.colorify(msg, "light_gray")
     @staticmethod
-    def purpleify(msg: str) -> str:       return Color.colorify(msg, "purple")
+    def purpleify(msg: str) -> str:     return Color.colorify(msg, "purple")
+    @staticmethod
+    def cyanify(msg: str) -> str:       return Color.colorify(msg, "cyan")
+    @staticmethod
+    def boldify(msg: str) -> str:       return Color.colorify(msg, "bold")
+    @staticmethod
+    def underlineify(msg: str) -> str: return Color.colorify(msg, "underline")
+    @staticmethod
+    def highlightify(msg: str) -> str: return Color.colorify(msg, "highlight")
+    @staticmethod
+    def blinkify(msg: str) -> str :    return Color.colorify(msg, "blink")
+
+
 
     @staticmethod
     def colorify(msg : str , color_key : str = "reset") -> str:
@@ -43,8 +55,10 @@ class Color:
 
 def color_test():
     print(Color.colorify("color", "blue"))
-    print("111")
-
+    print(Color.boldify("color"))
+    print(Color.underlineify("color"))
+    print(Color.blinkify("color"))
+    print(Color.redify(Color.boldify("color")))
 
 if __name__ == "__main__":
     color_test()
