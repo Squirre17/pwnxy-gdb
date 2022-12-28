@@ -20,9 +20,9 @@ def err(msg):
     print(msg)
 
 
-def hint(msg):
+def note(msg):
     prompt = Color.colorify("[*]" ,"blue")
-    body   = " HINT : "
+    body   = " NOTE : "
     print(prompt + body, end = "")
     print(msg)
 
@@ -36,4 +36,4 @@ if __name__ == "__main__":
     info(s)
     dbg(s)
     err(s)
-    hint(s)
+    note(s)

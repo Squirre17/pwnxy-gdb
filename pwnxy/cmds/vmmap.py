@@ -7,7 +7,7 @@ import pwnxy.file
 import pwnxy.memory
 from pwnxy.cmds import (Cmd, register)
 from pwnxy.utils.debugger import (unwrap, assert_eq, assert_ne, todo)
-from pwnxy.utils.output import (xy_print, info, err, hint, dbg)
+from pwnxy.utils.output import (xy_print, info, err, note, dbg)
 from pwnxy.utils.color import Color
 from pwnxy.memory import Page
 import gdb

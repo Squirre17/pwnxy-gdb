@@ -3,7 +3,7 @@ import sys
 
 class fake_gdb:
     def execute(self, cmd, from_tty = False, to_string = False):     
-        hint(f"executed {cmd}")
+        note(f"executed {cmd}")
         if to_string:
             return """
                     1 test cmd 
@@ -11,16 +11,13 @@ class fake_gdb:
                     3 test cmd 
             """
 # NOTE: remember specify PYTHONPATH
-from pwnxy.utils.output import (info, err, hint, dbg)
+from pwnxy.utils.output import (info, err, note, dbg)
 from pwnxy.utils.debugger import (assert_eq, assert_ne)
 
 import gdb
 
 # ---- decorator function ----- 
-# DEPRE: MV to other!
-def only_if_running() -> None:
-    # TODO:
-    ...
+
 
 # ------ gdb execute cmds in advance ------
 
@@ -51,9 +48,9 @@ for cmd in pre_exec_cmds.strip().splitlines():
     gdb.execute(cmd)
     info(f"gdb executed `{cmd}`")
 
-from pwnxy.config import PWNXY_PROMPT
+from pwnxy.config import PWNXY_PROMPT # TODO : RM this
 # TODO: temporary to choice
-gdb.execute(f"set prompt {PWNXY_PROMPT[0]}")
+# gdb.execute(f"set prompt {PWNXY_PROMPT[0]}")
 
 # TODO: maybe sometime can't disasm to intel format ?
 try:
@@ -63,9 +60,9 @@ except gdb.error:
 
 # ------ test region ------
 def from_addr(cls, p):
-        ptr = gdb.Value(p)
-        ptr = ptr.cast(cls.gdb_type())
-        return cls(ptr)
+    ptr = gdb.Value(p)
+    ptr = ptr.cast(cls.gdb_type())
+    return cls(ptr)
 
 lines_tmp = gdb.execute("show commands", from_tty = False, to_string = True)
 if lines_tmp is not None:
@@ -82,9 +79,11 @@ dbg(gdb.parse_and_eval("1+1"))
 assert_ne(b'', None)
 
 # ------- all cmd load by import ------
+# TODO: move to cmd __init__ and import cmd
 import pwnxy.cmds.aslr
 import pwnxy.cmds.vmmap
 import pwnxy.cmds.x
+import pwnxy.cmds.context
 # -------------------------------------
 
 # aslr()
@@ -93,19 +92,19 @@ import pwnxy.cmds.x
 
 
 from pwnxy.cmds import show_registered_cmds, PwnxyCmd
-show_registered_cmds()
 
 pcmd = PwnxyCmd()
 pcmd.__inst_all__() # TODO: maybe can register & instantiate at same time?
-from pwnxy.arch import get_arch
-get_arch()
 
-from pwnxy.ui import get_window_size
-get_window_size()
+gdb.execute("b final")
+gdb.execute("c")
 
-from pwnxy.context import Context
-context = Context()
-context.output_context()
+
+from pwnxy.config.parameters import Parameter
+Parameter("squ", 1, "123", "456")
+from pwnxy.hook import register_all_hooks
+register_all_hooks()
+
 # ------ ---------- ------
 
 # WARN: asdasdasd

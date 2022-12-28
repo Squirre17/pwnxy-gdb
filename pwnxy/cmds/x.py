@@ -38,7 +38,7 @@ from pwnxy.globals import __registered_cmds_cls__
 import pwnxy.file
 from pwnxy.cmds import (Cmd, register)
 from pwnxy.utils.debugger import (unwrap, assert_eq, assert_ne, todo)
-from pwnxy.utils.output import (xy_print, info, err, hint, dbg)
+from pwnxy.utils.output import (xy_print, info, err, note, dbg)
 from pwnxy.utils.color import Color
 
 class X(Cmd):
@@ -75,7 +75,6 @@ class BX(X):
 
 
         cmd = f"x/{num}{self.cmdname} {argv[0]}"
-        dbg(cmd)
         gdb.execute(cmd)
     
     def __usage__(self):
@@ -110,7 +109,6 @@ class HX(X):
             return 
 
         cmd = f"x/{num}{self.cmdname} {argv[0]}"
-        dbg(cmd)
         gdb.execute(cmd)
     
     def __usage__(self):
@@ -144,7 +142,6 @@ class WX(X):
             return 
 
         cmd = f"x/{num}{self.cmdname} {argv[0]}"
-        dbg(cmd)
         gdb.execute(cmd)
     
     def __usage__(self):
@@ -178,7 +175,6 @@ class GX(X):
             return 
 
         cmd = f"x/{num}{self.cmdname} {argv[0]}"
-        dbg(cmd)
         gdb.execute(cmd)
     
     def __usage__(self):

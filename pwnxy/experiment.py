@@ -1,33 +1,45 @@
+# import gdb
+# gdb.execute("start")
+# gdb.execute("set pagination off")
+# gdb.execute("set confirm off")
+# gdb.execute("b final")
+# gdb.execute("r")
+
+# Python program to demonstrate
+# default_factory argument of
+# defaultdict
+# class Decorator:
+#     def __init__(self) -> None:
+#         ...
+#     def __call__(self, f):
+#         print(f"invoked decorator with {f}")
+#         def wrapper(*args, **kwargs) :
+#             print("wrapper")
+#             return f(*args, **kwargs)
+#         return wrapper
+
+# class Test(object):
+#     @Decorator()
+#     def bar(self) :
+#         print("normal call")
+
+# test = Test()
+
+# # @Decorator()
+# # def aaa():
+# #     print("aaa")
+
+# test.bar()
+# test.bar()
+# test.bar()
+# test.bar()
+# test.bar()
+
+
+# aaa()
+# aaa()
+# aaa()
+# aaa()
+
 import gdb
-
-gdb.execute("set confirm off")
-gdb.execute("set verbose off")
-gdb.execute("set print pretty on")
-gdb.execute("set pagination off")
-
-gdb.execute("b swap")
-gdb.execute("r")
-frame = gdb.newest_frame()
-
-print(frame.name()) # main => prompt?
-# print( gdb.frame_stop_reason_string())
-
-print(gdb.frame_stop_reason_string(frame.unwind_stop_reason())) 
-# no reason 
-
-# Returns the frame’s resume address.
-print(hex(frame.pc())) # 0x401196
-
-print(frame.function()) # main
-
-# print(frame.order())
-print(frame.newer()) # None
-
-# Return the frame’s symtab and line object. See Symbol Tables In Python.
-print(frame.find_sal()) # symbol and line for c.c, line 15
-
-print(frame.read_register("rax")) # 4294956864
-
-# NOTE: The variable argument must be a string or a gdb.Symbol object;
-print(frame.read_var("b")) # 4199101
-
+print(gdb.selected_thread())

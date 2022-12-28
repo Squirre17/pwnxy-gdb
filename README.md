@@ -13,6 +13,8 @@ set PHTYONPATH (maybe can in gdbinit.py?...)
 - [ ] vmmap offset reduce to 4 byte len
 - [ ] add function or $PC in prompt ?
 - [ ] optional open diasam reg source code and watching window
+- [ ] add some timer and other decorators
+- [ ] setup instruction cache
 
 # TODO cmds
 - [ ] pid

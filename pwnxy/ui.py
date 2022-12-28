@@ -6,7 +6,7 @@ from pwnxy.globals import __registered_cmds_cls__
 import pwnxy.file
 from pwnxy.cmds import (Cmd, register)
 from pwnxy.utils.debugger import (unwrap, assert_eq, assert_ne, todo)
-from pwnxy.utils.output import (xy_print, info, err, hint, dbg)
+from pwnxy.utils.output import (xy_print, info, err, note, dbg)
 from pwnxy.utils.color import Color
 
 
@@ -34,7 +34,5 @@ def get_window_size() -> Tuple[int ,int]:
     # os.environ.get second argu is default val if first argu can't find
     linesz, colosz = (int(os.environ.get("LINES", 20)), int(os.environ.get("COLUMNS", 80)))
     # TODO: check tty argu passed is a target like stdin
-    dbg(linesz)
-    dbg(colosz)
     # TODO: use termios
     return (linesz, colosz)

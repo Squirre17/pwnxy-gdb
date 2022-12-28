@@ -2,12 +2,13 @@ from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
                     Iterator, List, NoReturn, Optional, Sequence, Set, Tuple, Type,
                     Union, NewType)
 from pwnxy.utils.debugger import (assert_eq, assert_ne, todo, debug)
-from pwnxy.utils.output import (info, err, hint, dbg)
+from pwnxy.utils.output import (info, err, note, dbg)
+from pwnxy.utils.color import Color
 # import pwnxy.globals
 try:
     import gdb
 except ModuleNotFoundError:
-    hint("import gdb can't be standalon")
+    note("import gdb can't be standalon")
 
 cmds : List[Type["Cmd"]] = []
 cmds_name : Set[str] = set()
@@ -23,11 +24,10 @@ gdb.execute (command [, from_tty [, to_string]]) ->  str | None
 '''Cmd:
     This is an abstract class for invoking commands, should not be instantiated
 '''
+
 class Cmd(gdb.Command):
     builtin_override_whitelist = {'up', 'down', 'search', 'pwd', 'start'} # TODO: 
     def __init__(self ,cmdline : str):
-        dbg("cmd __init__, str is %s" % cmdline)
-        # TODO: super gdb cmd init
         super().__init__(cmdline, gdb.COMMAND_USER) # TODO:
         # TODO:
     # TODO: return type use?
@@ -107,7 +107,6 @@ class PwnxyCmd:
         '''
         Load all cmd to gdb
         '''
-        dbg("start instantiate all cmds")
         args = []
         dbg(f"__registered_cmds_cls__ is {__registered_cmds_cls__}")
         for rcc in __registered_cmds_cls__:
@@ -138,8 +137,27 @@ def register(cls: Type["Cmd"]) -> Type[Cmd] :
 
 @debug
 def show_registered_cmds():
-    dbg("\tstart show_registered_cmds")
     for i in __registered_cmds_cls__:
         dbg(f"{i}")
 
-# FIXME: HACK:
+# TODO: move to other
+def is_alive() -> bool:
+    """Check if GDB is running."""
+    try:
+        return gdb.selected_inferior().pid > 0
+    except Exception:
+        return False
+
+# DECORATOR
+# DEPRE: 
+def only_if_running(func : Callable):
+    import functools
+    dbg("DEPRECATED:")
+    @functools.wraps(func)
+    def inner(*args, **kwargs):
+        if is_alive():
+            return func(*args, **kwargs)
+        else:
+            note("This program in not running")
+    return inner
+

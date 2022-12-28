@@ -1,7 +1,7 @@
 from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
                     Iterator, List, NoReturn, Optional, Sequence, Set, Tuple, Type,
                     Union, NewType)
-from pwnxy.utils.output import (info, err, hint, dbg)
+from pwnxy.utils.output import (info, err, note, dbg)
 from pwnxy.utils.color import Color
 
 def assert_eq(x : Any, y : Any):
@@ -31,6 +31,12 @@ def unwrap(oa : Optional[Any], fn : Callable = lambda : ...) -> Any:
     else:
         oa_inner : Any = oa
         return oa_inner
+# TODO: move to decarator.py
+def deprecated(func):
+    def inner(*args, **kwargs):
+        print(Color.redify("WARNING : this function have been deprecated"))
+        func(*args, **kwargs)
+    return inner
 
 NewType("TODO", Dict[int, Tuple[int, Sequence]])
     

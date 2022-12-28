@@ -6,7 +6,7 @@ from pwnxy.globals import __registered_cmds_cls__
 import pwnxy.file
 from pwnxy.cmds import (Cmd, register)
 from pwnxy.utils.debugger import (unwrap, assert_eq, assert_ne, todo)
-from pwnxy.utils.output import (xy_print, info, err, hint, dbg)
+from pwnxy.utils.output import (xy_print, info, err, note, dbg)
 from pwnxy.utils.color import Color
 
 # IDEA: maybe can add more info in prompt

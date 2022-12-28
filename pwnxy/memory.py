@@ -10,7 +10,7 @@ import pwnxy.file
 import pwnxy.memory
 from pwnxy.cmds import (Cmd, register)
 from pwnxy.utils.debugger import (unwrap, assert_eq, assert_ne, todo)
-from pwnxy.utils.output import (xy_print, info, err, hint, dbg)
+from pwnxy.utils.output import (xy_print, info, err, note, dbg)
 from pwnxy.utils.color import Color
 
 import gdb
@@ -20,7 +20,7 @@ def read(addr : int, size : int) -> bytearray :
     try :
         val : memoryview = gdb.selected_inferior().read_memory(addr, size)
     except Exception as e :
-        raise e
+        err(f"TODO {e}")
     return bytearray(val)
 
 # TODO: gdbtype became a enum
@@ -33,7 +33,7 @@ def read_by_type(addr, gdb_type) -> int:
     try:
         value = value.cast(gdb_type)
     except gdb.error as e:
-        raise e
+        err(e)
     
     return int(value.dereference())
 
@@ -51,7 +51,10 @@ def write(addr : int, size : int, value : Union[int, str, bytes]) -> None :
         data = value
     else :
         err("TypeError")
-    gdb.selected_inferior().write_memory(addr, data, size)
+    try :
+        gdb.selected_inferior().write_memory(addr, data, size)
+    except Exception as e :
+        err(e)
 
 def peek(addr : int) -> Optional[bytes]:
     '''
