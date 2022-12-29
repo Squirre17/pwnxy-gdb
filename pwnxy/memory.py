@@ -1,19 +1,19 @@
 '''
 memory peek poke operations, 
 '''
-from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
-                    Iterator, List, NoReturn, Optional, Sequence, Set, Tuple, Type,
-                    Union, NewType)
+import traceback
+import pwnxy.memory
+
+from typing import (List, Optional, Union)
 
 from pwnxy.globals import __registered_cmds_cls__
-import pwnxy.file
-import pwnxy.memory
-from pwnxy.cmds import (Cmd, register)
+
 from pwnxy.utils.debugger import (unwrap, assert_eq, assert_ne, todo)
-from pwnxy.utils.output import (xy_print, info, err, note, dbg)
+from pwnxy.utils.output import (err_print_exc, xy_print, info, err, note, dbg)
 from pwnxy.utils.color import Color
 
 import gdb
+import traceback
 
 def read(addr : int, size : int) -> bytearray :
     assert size > 0 and size <= 8, "size error"
@@ -21,6 +21,7 @@ def read(addr : int, size : int) -> bytearray :
         val : memoryview = gdb.selected_inferior().read_memory(addr, size)
     except Exception as e :
         err(f"TODO {e}")
+        traceback.print_exc()
     return bytearray(val)
 
 # TODO: gdbtype became a enum
@@ -33,14 +34,14 @@ def read_by_type(addr, gdb_type) -> int:
     try:
         value = value.cast(gdb_type)
     except gdb.error as e:
-        err(e)
-    
+        err_print_exc(e)
+
     return int(value.dereference())
 
 def write(addr : int, size : int, value : Union[int, str, bytes]) -> None :
     assert size > 0 and size <= 8, "size error"
     if isinstance(value, int) :
-        # Considering byte order according to arch
+        # TODO: Considering byte order according to arch
         assert value <= 0xffffffffffffffff
         data = int.to_bytes(value, byteorder = "little")
     elif isinstance(value, str) :
@@ -54,16 +55,18 @@ def write(addr : int, size : int, value : Union[int, str, bytes]) -> None :
     try :
         gdb.selected_inferior().write_memory(addr, data, size)
     except Exception as e :
-        err(e)
+        err_print_exc(e)
+        
 
-def peek(addr : int) -> Optional[bytes]:
+def is_access(addr : int) -> bool:
     '''
-    read a byte from the given address
-    if can't read, return None
+    check whether access in given memory address
     '''
-    try    : return read(addr, 1)
-    except : pass
-    return None
+    try : 
+        read(addr, 1)
+        return True
+    except : 
+        return False
 
 # write a bytes
 def poke():
@@ -91,10 +94,6 @@ class Page:
     @property
     def end(self) -> int:
         return self.__end
-
-    @property
-    def perm(self) -> int:
-        return self.__perm
     
     @property
     def offset(self) -> int:

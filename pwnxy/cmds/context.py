@@ -4,9 +4,9 @@ from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
                     Union, NewType)
 from pwnxy.globals import __registered_cmds_cls__
 import pwnxy.file
-from pwnxy.cmds import (only_if_running,Cmd, register)
-from pwnxy.utils.debugger import (deprecated ,unwrap, assert_eq, assert_ne, todo)
-from pwnxy.utils.output import (xy_print, info, err, note, dbg)
+from pwnxy.cmds import (Cmd, register)
+from pwnxy.utils.debugger import (unwrap, assert_eq, assert_ne, todo)
+from pwnxy.utils.output import (err_print_exc, xy_print, info, err, note, dbg)
 from pwnxy.utils.color import Color
 from pwnxy.utils.hightlight import highlight_src
 import gdb
@@ -15,8 +15,8 @@ from pwnxy.ui import banner
 from pwnxy.registers import AMD64_REG
 from pwnxy.config.parameters import Parameter
 from pwnxy.disasm import disassembler, Instruction
-from pwnxy.utils.decorator import OnlyIfRunning
-# TODO: only_if_running
+from pwnxy.utils.decorator import (only_if_running, deprecated)
+
 # TODO: context + subcmd like `context bracktrace`
 # def disasm_context() -> None: ...
 # TODO: source code need syntax highlight
@@ -40,11 +40,11 @@ class Context(Cmd):
         try:
             pc = int(gdb.selected_frame().pc())
         except Exception as e:
-            err(e)
+            err_print_exc(e)
         # TODO: add sym
 
         prefix = "→"
-        fmtstr = "{prefix} {addr:<8s} {mnem:<6s} {operand:<10s}\n"
+        fmtstr = "{prefix} {addr:<8s} {sym} {mnem:<6s} {operand:<10s}\n"
         fmt_list : List[str] = []
         # TODO: conditional jump, syscall
         for i in disasm :
@@ -52,12 +52,14 @@ class Context(Cmd):
                 prefix = " ",
                 addr = hex(i.addr), 
                 mnem = i.mnem,
-                operand = i.operand
+                operand = i.operand,
+                sym = i.symbol
             ) if i.addr != pc else Color.greenify(fmtstr.format(
                     prefix = prefix,
                     addr = hex(i.addr), 
                     mnem = i.mnem,
-                    operand = i.operand
+                    operand = i.operand,
+                    sym = i.symbol
                 ))
 
             fmt_list.append(tmp)
@@ -167,13 +169,13 @@ class Context(Cmd):
             try :
                 cur_args = gdb.FrameDecorator.FrameDecorator(cur_frame).frame_args()
             except Exception as e:
-                err(e)
+                err_print_exc(e)
             
             # assert cur_args is not None
             # TODO: cur_args maybe be None
             if cur_args is None:
                 break
-            
+
             line = fmt.format(
                 idx    = Color.blueify("#" + str(idx)) if cur_frame == new_frame else Color.purpleify("#" + str(idx)) ,
                 width  = len(str(default_bt_cnt)), # TEMP: this
@@ -211,26 +213,26 @@ class Context(Cmd):
         "ghidra" : __context_ghidra,
         "ws"     : __context_watchstruct,
     }
-    # TODO: subcontext
-    @deprecated
-    def output_context(self):
-        result = ""
-        for title ,fn in self.context_sections.items():
-            result += fn()
-        print(result, end = "")
 
     # TODO; deal with subcmd
-    @OnlyIfRunning()
+    @only_if_running
     def invoke(self, args : List[str], from_tty : bool = False) -> None:
-        dbg("context cmd invoked")
-        self.do_invoke(args, from_tty)
+        '''
+        subcmd :
+            context regs
+            context bt
+            context code
+        subcmd on/off
+            `context regs off/on/om(only modified)` or `context regs out`
 
-    @OnlyIfRunning()
-    def do_invoke(self, args : List[str], from_tty : bool = False) -> None:
+        TODO: help context 
+        '''
         dbg("context cmd do_invoked")
+        assert len(args) <= 3
         result = ""
         for title ,fn in self.context_sections.items():
             result += fn()
         print(result, end = "")
+        print(banner("END")) 
 
 

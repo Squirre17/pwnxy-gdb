@@ -1,17 +1,8 @@
 import os 
 import sys
 
-class fake_gdb:
-    def execute(self, cmd, from_tty = False, to_string = False):     
-        note(f"executed {cmd}")
-        if to_string:
-            return """
-                    1 test cmd 
-                    2 test cmd 
-                    3 test cmd 
-            """
 # NOTE: remember specify PYTHONPATH
-from pwnxy.utils.output import (info, err, note, dbg)
+from pwnxy.utils.output import (err_print_exc,info, err, note, dbg)
 from pwnxy.utils.debugger import (assert_eq, assert_ne)
 
 import gdb
@@ -60,8 +51,12 @@ except gdb.error:
 
 # ------ test region ------
 def from_addr(cls, p):
-    ptr = gdb.Value(p)
-    ptr = ptr.cast(cls.gdb_type())
+    try :
+        ptr = gdb.Value(p)
+        ptr = ptr.cast(cls.gdb_type())
+    except Exception as e:
+        err_print_exc(e)
+
     return cls(ptr)
 
 lines_tmp = gdb.execute("show commands", from_tty = False, to_string = True)
@@ -72,7 +67,7 @@ for ln in lines:
     dbg(ln)
 
 dbg("--------------DBG-TEST-----------------")
-gdb.execute("start")
+
 dbg("prefix with `0x` => %#x" % 123)
 dbg(gdb.parse_and_eval("1+1"))
 
@@ -84,6 +79,7 @@ import pwnxy.cmds.aslr
 import pwnxy.cmds.vmmap
 import pwnxy.cmds.x
 import pwnxy.cmds.context
+import pwnxy.cmds.checksec
 # -------------------------------------
 
 # aslr()
@@ -96,15 +92,20 @@ from pwnxy.cmds import show_registered_cmds, PwnxyCmd
 pcmd = PwnxyCmd()
 pcmd.__inst_all__() # TODO: maybe can register & instantiate at same time?
 
-gdb.execute("b final")
-gdb.execute("c")
+# gdb.execute("b final")
+# gdb.execute("c")
 
 
 from pwnxy.config.parameters import Parameter
 Parameter("squ", 1, "123", "456")
 from pwnxy.hook import register_all_hooks
 register_all_hooks()
+from pwnxy.utils.decorator import debug, timer
+# gdb.execute("start")
 
+import pwnxy.symbol
+pwnxy.symbol.get("final")
+pwnxy.symbol.get(0x4011e1)
 # ------ ---------- ------
 
 # WARN: asdasdasd

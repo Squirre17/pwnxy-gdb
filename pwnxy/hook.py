@@ -5,7 +5,7 @@ from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
 from pwnxy.globals import __registered_cmds_cls__
 import pwnxy.file
 from pwnxy.cmds import (Cmd, register)
-from pwnxy.utils.debugger import (deprecated ,unwrap, assert_eq, assert_ne, todo)
+from pwnxy.utils.debugger import (unwrap, assert_eq, assert_ne, todo)
 from pwnxy.utils.output import (xy_print, info, err, note, dbg)
 from pwnxy.utils.color import Color
 from pwnxy.utils.hightlight import highlight_src
@@ -31,7 +31,7 @@ def register_hook(fn : Callable) -> None:
 def hook_stop_handler(_ : gdb.StopEvent) -> None:
     """GDB event handler for stop cases."""
     gdb.execute("context")
-    return
+
 
 
 def stop_event_hook(fn : Callable[["gdb.StopEvent"], None]) -> None:

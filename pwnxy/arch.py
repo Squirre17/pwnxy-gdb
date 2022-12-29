@@ -4,25 +4,26 @@ current only serve for registers
 from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
                     Iterator, List, NoReturn, Optional, Sequence, Set, Tuple, Type,
                     Union, NewType)
-from pwnxy.cmds import only_if_running
 import pwnxy.file
 from pwnxy.cmds import (Cmd, register)
 from pwnxy.utils.debugger import (unwrap, assert_eq, assert_ne, todo)
 from pwnxy.utils.output import (xy_print, info, err, note, dbg)
 from pwnxy.utils.color import Color
 import gdb
-from pwnxy.utils.decorator import OnlyIfRunning
+import traceback
+from pwnxy.utils.decorator import only_if_running
 '''GDB API
 newest_frame will return cur thread's stack frame obj  
 '''
-@OnlyIfRunning()
+@only_if_running
 def get_arch() :
     # IF RUNNING
-    arch_name = gdb.newest_frame().architecture().name()
+    try :
+        arch_name = gdb.newest_frame().architecture().name()
+    except Exception as e:
+        traceback.print_exc()
     dbg(arch_name) # i386:x86-64
     # TODO: ELSE proc.alive
-
-
 
 
 

@@ -18,6 +18,9 @@ __sym = {
     "left-square-bracket"  : "[",
     "right-square-bracket" : "]",
     "right-arrow"          : "→",
+    "cross"                : "✘",
+    "tick"                 : "✓",
+    "breakpoint"           : "●",
 }
 
 def banner(title : str) -> str:

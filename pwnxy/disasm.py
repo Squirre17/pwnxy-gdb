@@ -4,8 +4,8 @@ from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
 from pwnxy.globals import __registered_cmds_cls__
 import pwnxy.file
 from pwnxy.cmds import (Cmd, register)
-from pwnxy.utils.debugger import (deprecated ,unwrap, assert_eq, assert_ne, todo)
-from pwnxy.utils.output import (xy_print, info, err, note, dbg)
+from pwnxy.utils.debugger import (unwrap, assert_eq, assert_ne, todo)
+from pwnxy.utils.output import (err_print_exc, xy_print, info, err, note, dbg)
 from pwnxy.utils.color import Color
 from pwnxy.utils.hightlight import highlight_src
 import gdb
@@ -14,13 +14,20 @@ from pwnxy.ui import banner
 from pwnxy.registers import AMD64_REG
 from pwnxy.config.parameters import Parameter
 from collections import defaultdict
+import pwnxy.symbol
 
 class Instruction:
-    def __init__(self, addr : int, mnem : str, operand : str, length : int):
+    def __init__(self, addr    : int, 
+                       mnem    : str, 
+                       operand : str, 
+                       length  : int):
+
         self.__addr    = addr
         self.__mnem    = mnem
         self.__operand = operand
         self.__length  = length
+        symbol = pwnxy.symbol.get(addr)
+        self.__symbol = str(symbol) if symbol else ""
 
     @property
     def addr(self) :
@@ -34,9 +41,13 @@ class Instruction:
     @property
     def length(self) :
         return self.__length
+    @property
+    def symbol(self) :
+        return self.__symbol
     @addr.setter
     def addr(self, addr : int) :
         self.__addr = addr
+        
     ...
 
 # TODO: internel use , add underscore
@@ -101,8 +112,11 @@ class Disassembler(InstructionCache):
             gdb.execute("set disassembly-flavor intel")
         except gdb.error :
             err("TODO: intel flavor")
-        
-        arch = gdb.selected_frame().architecture()
+        try :
+            arch = gdb.selected_frame().architecture()
+        except Exception as e :
+            err_print_exc(e)
+
         '''arch.disassemble return List[Dict[str, obj]]
         [
             {'addr': 4198742, 'asm': 'endbr64 ', 'length': 4},
@@ -124,7 +138,7 @@ class Disassembler(InstructionCache):
                 mnem, operand = asm[0], ""
             length = ins["length"]
             #TODO: maybe can create a address obj
-            from pwnxy.symbols import get_sym_by_addr
+            from pwnxy.symbol import get_sym_by_addr
             sym = get_sym_by_addr(addr)
             symbol = "[SYMBOL#TODO:]" if sym else "" # TODO:
             instructions.append(Instruction(addr, mnem, operand, length))
@@ -136,13 +150,14 @@ class Disassembler(InstructionCache):
         '''
         get instructions near the PC
         '''
+        # TODO: check the pc validity
         # TODO: maybe pc can directly obtain don't need of arg
         backward_num = 3 # TEMP:
         forward_num = 7
         try:
             pc = int(gdb.selected_frame().pc())
         except Exception as e:
-            err(e)
+            err_print_exc(e)
 
         return self.backward_fetch(pc, backward_num) + self.get(pc, forward_num)
 

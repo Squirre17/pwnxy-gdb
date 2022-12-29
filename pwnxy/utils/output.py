@@ -1,5 +1,5 @@
 from pwnxy.utils.color import Color
-
+import traceback
 def info(msg):
     prompt = Color.colorify("[+]" ,"green")
     body   = " INFO : "
@@ -30,6 +30,10 @@ def note(msg):
 def xy_print(*args):
     print("[XYPRINT] : ", end = "")
     print(*args)
+
+def err_print_exc(msg):
+    err(msg)
+    traceback.print_exc()
 
 if __name__ == "__main__":
     s = "123"

@@ -31,15 +31,7 @@ def unwrap(oa : Optional[Any], fn : Callable = lambda : ...) -> Any:
     else:
         oa_inner : Any = oa
         return oa_inner
-# TODO: move to decarator.py
-def deprecated(func):
-    def inner(*args, **kwargs):
-        print(Color.redify("WARNING : this function have been deprecated"))
-        func(*args, **kwargs)
-    return inner
 
-NewType("TODO", Dict[int, Tuple[int, Sequence]])
-    
 if __name__ == "__main__":
     assert_eq(1, 2)
 

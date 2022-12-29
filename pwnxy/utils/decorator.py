@@ -1,40 +1,47 @@
+'''
+all decorators
+'''
 import gdb
-from typing import Callable
-from pwnxy.utils.debugger import (err, dbg, note)
-# TODO: move to other
-def is_alive() -> bool:
-    """Check if GDB is running."""
-    print("""Check if GDB is running.""")
-    try:
-        return gdb.selected_inferior().pid > 0
-    except Exception:
-        return False
+import functools
+import time
 
-# DECORATOR
-# DEPRE: 
-def only_if_running(func : Callable):
-    import functools
-    dbg("DEPRECATED:")
+from typing import (Callable, Any)
+from pwnxy.utils.debugger import (err, dbg, note)
+from pwnxy.proc import proc
+from pwnxy.utils.color import Color
+
+
+def only_if_running(func : Callable) -> Callable:
     @functools.wraps(func)
-    def inner(*args, **kwargs):
-        if is_alive():
+    def wrapper(*args, **kwargs) -> Any:
+        if proc.is_alive:
             return func(*args, **kwargs)
         else:
             note("This program in not running")
-    return inner
+    return wrapper
 
-class OnlyIfRunning:
-    def __init__(self) -> None:
-        ...
-    def __call__(self, f):
-        import functools
-        
+def deprecated(func : Callable) -> Callable:
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs) -> Any:
+        print(Color.redify("WARNING : this function have been deprecated"))
+        return func(*args, **kwargs)
+    return wrapper
 
-        @functools.wraps(f)
-        def wrapper(*args, **kwargs) :
-            print(f"invoked decorator with {f}")
-            if is_alive():
-                return f(*args, **kwargs)
-            else:
-                note("This program in not running")
-        return wrapper
+def timer(func : Callable) -> Callable:
+    @functools.wraps(func)
+    def wrapper(*args , **kwargs) -> Any:
+        start = time.time()
+        ret = func(*args, **kwargs)
+        end   = time.time()
+        note("function {} spend {:0.8f} ms".format(func.__name__, (end - start) * 1000))
+        return ret
+    return wrapper
+
+def debug(func : Callable) -> Callable:
+    @functools.wraps(func)
+    def wrapper(*args , **kwargs) -> Any:
+        dbg(f"function -> {func.__name__} : START")
+        ret = func(*args, **kwargs)
+        dbg(f"function -> {func.__name__} : END")
+        return ret
+    return wrapper

@@ -8,38 +8,11 @@
 # Python program to demonstrate
 # default_factory argument of
 # defaultdict
-# class Decorator:
-#     def __init__(self) -> None:
-#         ...
-#     def __call__(self, f):
-#         print(f"invoked decorator with {f}")
-#         def wrapper(*args, **kwargs) :
-#             print("wrapper")
-#             return f(*args, **kwargs)
-#         return wrapper
-
-# class Test(object):
-#     @Decorator()
-#     def bar(self) :
-#         print("normal call")
-
-# test = Test()
-
-# # @Decorator()
-# # def aaa():
-# #     print("aaa")
-
-# test.bar()
-# test.bar()
-# test.bar()
-# test.bar()
-# test.bar()
-
-
-# aaa()
-# aaa()
-# aaa()
-# aaa()
 
 import gdb
-print(gdb.selected_thread())
+import traceback
+from pwnxy.utils.output import err_print_exc
+try :
+    arch_name = gdb.newest_frame().architecture().name()
+except Exception as e :
+    err_print_exc(e)

@@ -2,7 +2,7 @@ from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
                     Iterator, List, NoReturn, Optional, Sequence, Set, Tuple, Type,
                     Union, NewType)
 from pwnxy.utils.debugger import (assert_eq, assert_ne, todo, debug)
-from pwnxy.utils.output import (info, err, note, dbg)
+from pwnxy.utils.output import (err_print_exc, info, err, note, dbg)
 from pwnxy.utils.color import Color
 # import pwnxy.globals
 try:
@@ -51,7 +51,7 @@ class Cmd(gdb.Command):
         try:
             args : List[str] = self.split_args(arguline) 
         except Exception as e: # TODO: extend here
-            err(e)
+            err_print_exc(e)
         
         # gdb.execute(args) TODO:
 
@@ -110,10 +110,7 @@ class PwnxyCmd:
         args = []
         dbg(f"__registered_cmds_cls__ is {__registered_cmds_cls__}")
         for rcc in __registered_cmds_cls__:
-            rcc_inst = rcc()
-
-
-
+            rcc()
 
 # TODO: seemings sloppy : This function should be used as ``argparse.ArgumentParser`` .add_argument method's `type` helper
 def gdb_parse(s : str):
@@ -123,11 +120,10 @@ def gdb_parse(s : str):
         val = gdb.parse_and_eval(s)
         return int(val.cast(_mask_val_type))
     except Exception as e:
-        err(e)
+        err_print_exc(e)
     
 # TODO: Maybe have register function
 def register(cls: Type["Cmd"]) -> Type[Cmd] :
-    dbg(f"{cls} registered")
     assert(issubclass(cls, Cmd))
     assert(hasattr(cls, "invoke"))
     assert(hasattr(cls, "cmdname"))
@@ -135,29 +131,7 @@ def register(cls: Type["Cmd"]) -> Type[Cmd] :
     __registered_cmds_cls__.add(cls)
     return cls
 
-@debug
 def show_registered_cmds():
     for i in __registered_cmds_cls__:
         dbg(f"{i}")
-
-# TODO: move to other
-def is_alive() -> bool:
-    """Check if GDB is running."""
-    try:
-        return gdb.selected_inferior().pid > 0
-    except Exception:
-        return False
-
-# DECORATOR
-# DEPRE: 
-def only_if_running(func : Callable):
-    import functools
-    dbg("DEPRECATED:")
-    @functools.wraps(func)
-    def inner(*args, **kwargs):
-        if is_alive():
-            return func(*args, **kwargs)
-        else:
-            note("This program in not running")
-    return inner
 
