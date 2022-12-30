@@ -11,29 +11,39 @@ from pwnxy.utils.color import Color
 from pwnxy.utils.hightlight import highlight_src
 import gdb
 from pwnxy.arch import curarch
-from pwnxy.ui import banner
+import pwnxy.ui
 from pwnxy.registers import AMD64_REG
 from pwnxy.config.parameters import Parameter
 from pwnxy.disasm import disassembler, Instruction
-from pwnxy.utils.decorator import (only_if_running, deprecated)
+from pwnxy.utils.decorator import *
+from pwnxy.breakpoint import BPs
 
 # TODO: context + subcmd like `context bracktrace`
 # def disasm_context() -> None: ...
 # TODO: source code need syntax highlight
 
 # TODO: add user context specify setting
-
+# TODO: 
 @register
 class Context(Cmd):
-    cmdname = 'context'
+    cmdname  = 'context'
+    syntax   = 'context [subcmd]'
+    examples = (
+        "context",
+        "context regs/disasm/code/bt/ghidra/ws", # NOTE : This need to manual maintain...
+        "context regs/disasm/code/bt/ghidra/ws out" # TODO: current not
+    )
 
     def __init__(self):
         super().__init__(self.cmdname)
+        # WARN: don't use following init assignment, otherwise context will lose
+        # self.context_sections = {} # TODO: orderdict? 
 
     # TODO: add breakpoint display
     # TODO: colorify ,hightlight ,fade
     # TODO: arch name(option?)
     # TODO: encapulate pc
+    @debug
     def __context_disasm() -> str:
 
         disasm : List[Instruction] = disassembler.nearpc()
@@ -41,30 +51,53 @@ class Context(Cmd):
             pc = int(gdb.selected_frame().pc())
         except Exception as e:
             err_print_exc(e)
-        # TODO: add sym
+            err("impossible for __context_disasm")
 
-        prefix = "→"
-        fmtstr = "{prefix} {addr:<8s} {sym} {mnem:<6s} {operand:<10s}\n"
+        pc_icov = Color.greenify("→") # TEMP:
+        bp_icov = Color.redify("●")
+        fmtstr = "{addr:<8s} {sym:<12s} {mnem:<6s} {operand:<10s}\n"
         fmt_list : List[str] = []
         # TODO: conditional jump, syscall
         for i in disasm :
-            tmp = fmtstr.format(
-                prefix = " ",
-                addr = hex(i.addr), 
-                mnem = i.mnem,
-                operand = i.operand,
-                sym = i.symbol
-            ) if i.addr != pc else Color.greenify(fmtstr.format(
-                    prefix = prefix,
+            '''
+            0x4011cb <f5+19>          pop    rbp
+            0x4011cc <f5+20>          ret    
+            0x4011cd <main+0>         endbr64 
+        ●→  0x4011d1 <main+4>         push   rbp
+            0x4011d2 <main+5>         mov    rbp, rsp
+            0x4011d5 <main+8>         mov    eax, 0x0
+
+        bp pc addr sym mnem oprand
+            '''
+            bp_prefix = bp_icov if BPs.addr_has_bp(i.addr) else " "
+            pc_prefix = pc_icov if pc == i.addr else " "
+            prefix = f"{bp_prefix}{pc_prefix} "
+
+            if i.addr < pc:    # passed instruction ,fade it 
+                line = prefix + Color.grayify(fmtstr.format(
                     addr = hex(i.addr), 
+                    sym = i.symbol,
                     mnem = i.mnem,
                     operand = i.operand,
-                    sym = i.symbol
                 ))
+            elif i.addr == pc: # hit pc ,green it
+                line = prefix + Color.greenify(fmtstr.format(
+                    addr = hex(i.addr), 
+                    sym = i.symbol,
+                    mnem = i.mnem,
+                    operand = i.operand,
+                ))
+            else :             # normal
+                line = prefix + fmtstr.format(
+                    addr = hex(i.addr), 
+                    sym = i.symbol,
+                    mnem = i.mnem,
+                    operand = i.operand,
+                ) 
 
-            fmt_list.append(tmp)
+            fmt_list.append(line)
         
-        return banner("DISASM") + "".join(fmt_list) # with ending '\n' 
+        return pwnxy.ui.banner("DISASM") + "".join(fmt_list) # with ending '\n' 
 
     def __context_regs() -> str:
         dbg("entered __context_regs")
@@ -78,14 +111,15 @@ class Context(Cmd):
             result.append(
                 "{:<4s} ".format(r).upper() + "{:#x}".format(val) + '\n'
             )
-        return banner("REGS") + "".join(result)
+        return pwnxy.ui.banner("REGS") + "".join(result)
     
-
     def __context_code() -> str:
-        dbg("entered __context_code")
+        '''
+        get source code context
+        '''
         sal = gdb.selected_frame().find_sal()
         if sal is None:
-            err("TODO: wait for deal with")
+            err_print_exc("impossible in __context_code")
         try :
             fullname = sal.symtab.fullname()
         except AttributeError:
@@ -94,11 +128,10 @@ class Context(Cmd):
         
         src = pwnxy.file.get_text(fullname)
 
-        if src is None:
-            # can't get src code
+        if src is None: # repr that can't get src code
             return ""
         
-        pivot_line = sal.line # TODO: seems like current line
+        pivot_line = sal.line # PUZZ: seems like current line
         src : List[str] = highlight_src(src.split("\n"))
 
         start_line    = max(pivot_line - 3, 0) # TODO: complexify
@@ -125,8 +158,9 @@ class Context(Cmd):
                 code         = code
             ))
 
-        return banner("src") + "\n".join(result) + "\n"
+        return pwnxy.ui.banner("src") + "\n".join(result) + "\n"
     # TODO: add "at file "
+    @debug
     def __context_backtrace() -> str:
         dbg("entered __context_backtrace")
         # TODO: ref config setting with gdb
@@ -192,7 +226,7 @@ class Context(Cmd):
             lines.append(line)
             cur_frame = cur_frame.older()
 
-        return banner("bt") +"\n".join(lines) + "\n"
+        return pwnxy.ui.banner("bt") +"\n".join(lines) + "\n"
 
     def __context_ghidra() -> str:
         dbg("entered __context_ghidra")
@@ -227,12 +261,11 @@ class Context(Cmd):
 
         TODO: help context 
         '''
-        dbg("context cmd do_invoked")
         assert len(args) <= 3
         result = ""
         for title ,fn in self.context_sections.items():
             result += fn()
         print(result, end = "")
-        print(banner("END")) 
+        print(pwnxy.ui.banner("END")) 
 
 

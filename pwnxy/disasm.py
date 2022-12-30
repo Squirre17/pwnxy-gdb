@@ -26,24 +26,30 @@ class Instruction:
         self.__mnem    = mnem
         self.__operand = operand
         self.__length  = length
+        # automatous get instruction symbol rather than out argu pass
         symbol = pwnxy.symbol.get(addr)
         self.__symbol = str(symbol) if symbol else ""
 
     @property
     def addr(self) :
         return self.__addr
+
     @property
     def mnem(self) :
         return self.__mnem
+
     @property
     def operand(self) :
         return self.__operand
+
     @property
     def length(self) :
         return self.__length
+
     @property
     def symbol(self) :
         return self.__symbol
+        
     @addr.setter
     def addr(self, addr : int) :
         self.__addr = addr
@@ -84,9 +90,7 @@ class InstructionCache:
             prev_inst = self.addr2previnst[prev_inst.addr]
             count -= 1
             
-        for i in insts :
-            dbg(f"backward fetched {i.addr}")
-        return insts 
+        return insts
     
 class Disassembler(InstructionCache):
     '''
@@ -137,10 +141,7 @@ class Disassembler(InstructionCache):
             else :
                 mnem, operand = asm[0], ""
             length = ins["length"]
-            #TODO: maybe can create a address obj
-            from pwnxy.symbol import get_sym_by_addr
-            sym = get_sym_by_addr(addr)
-            symbol = "[SYMBOL#TODO:]" if sym else "" # TODO:
+            #IDEA: maybe can create a address obj
             instructions.append(Instruction(addr, mnem, operand, length))
         
         self.push2cache(instructions)

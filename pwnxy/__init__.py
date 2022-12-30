@@ -103,9 +103,13 @@ register_all_hooks()
 from pwnxy.utils.decorator import debug, timer
 # gdb.execute("start")
 
-import pwnxy.symbol
-pwnxy.symbol.get("final")
-pwnxy.symbol.get(0x4011e1)
+import pwnxy.breakpoint as breakpoint
+
+# dbg(breakpoint.get())
+gdb.execute("b final")
+# gdb.execute("b *0x12345")
+# gdb.execute("b *12345")
+breakpoint.print_location()
 # ------ ---------- ------
 
 # WARN: asdasdasd
@@ -123,3 +127,7 @@ pwnxy.symbol.get(0x4011e1)
 # NOTE: 
 
 # DEPRE: 
+
+# PUZZ: 
+
+# IDEA:

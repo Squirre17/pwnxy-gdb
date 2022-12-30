@@ -22,7 +22,7 @@ class Symbol:
         self.__sym    : str = sym
         self.__offset : int = offset
 
-    def __str__(self):
+    def __str__(self): # TODO: if offset is 0 return `<sym>` rather than `<sym+0>`
         return "<" + self.__sym + "+" + str(self.__offset) + ">"
 
     @property
@@ -67,14 +67,18 @@ def get(obj : Union[str, int]) -> Optional[Union[Type["Symbol"], int]]:
             # TODO: return None 
 
     elif type(obj) is int:
-        assert obj <= ((1 << 64) - 1)
+        assert obj <= ((1 << 64) - 1) # TEMP integrate to other module
         addr = obj
         try :
-            '''NOTE: the offset is decimal
+            '''
+            NOTE: the offset is decimal
+
             # pwnxy @ main > info symbol 0x4011d1
             main + 4 in section .text of /home/squ/proj/pwnxy/pwnxy_gdb/tmp/a.out
+
             # pwnxy @ main > info symbol 0x123456
             No symbol matches 0x123456.
+
             # pwnxy @ main > info symbol 0x4011cd
             main in section .text of /home/squ/proj/pwnxy/pwnxy_gdb/tmp/a.out
             '''
@@ -88,7 +92,7 @@ def get(obj : Union[str, int]) -> Optional[Union[Type["Symbol"], int]]:
                     offset = int(match.group(2))
                     symbol = Symbol(name, offset)
                     return symbol
-                else :# TODO: not familiar with re ,
+                else :# TODO: cuz not familiar with re ,so use this remedy
                     expr = r"(.*)\sin"
                     match = re.search(expr, result)
                     if match:
@@ -106,15 +110,6 @@ def get(obj : Union[str, int]) -> Optional[Union[Type["Symbol"], int]]:
             ...
     else:
         err("symbol.get : TypeError")
-
-# TODO integrate
-@deprecated
-def get_sym_by_addr(addr : int) -> None:
-    '''
-    TODO: maybe can create a address obj
-    get symbol from given addr
-    '''
-    note("TODO me")
 
 def get_debug_dir() -> Optional[str]:
     result = gdb.execute("show debug-file-directory", from_tty = False, to_string = True)
@@ -134,23 +129,6 @@ def add_debug_dir(dir : str) -> None:
     else:
         set_debug_dir(dir)
 
-@deprecated
-def get_addr_by_sym(symbol : str) -> int:
-    '''
-    get address of a given symbol
-    '''
-    try :
-        ''' lookup_symbol :
-        The result is a tuple of two elements. The first element is a gdb.Symbol object or None if the symbol is not found. If the symbol is found, the second element is True if the symbol is a field of a method’s object 
-        '''
-        symbolobj, _ = gdb.lookup_symbol(symbol)
-        if symbolobj is not None :
-            return int(symbolobj.value().address)
-
-    except Exception:
-        pass
-    
-    # TODO: other search
 
 
 
