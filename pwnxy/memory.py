@@ -6,7 +6,6 @@ import pwnxy.memory
 
 from typing import (List, Optional, Union)
 
-from pwnxy.globals import __registered_cmds_cls__
 
 from pwnxy.utils.debugger import (unwrap, assert_eq, assert_ne, todo)
 from pwnxy.utils.output import (err_print_exc, xy_print, info, err, note, dbg)

@@ -6,12 +6,15 @@ def info(msg):
     print(prompt + body, end = "")
     print(msg)
 
+in_debug = True
 
 def dbg(msg):
-    prompt = Color.colorify("[#]" ,"yellow")
-    body   = " DBG  : "
-    print(prompt + body, end = "")
-    print(msg)
+    if in_debug:
+        prompt = Color.colorify("[#]" ,"yellow")
+        body   = " DBG  : "
+        print(prompt + body, end = "")
+        print(msg)
+    else : pass
 
 def err(msg):
     prompt = Color.colorify("[!]" ,"red")

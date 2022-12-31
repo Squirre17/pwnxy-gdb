@@ -1,7 +1,6 @@
 from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
                     Iterator, List, NoReturn, Optional, Sequence, Set, Tuple, Type,
                     Union, NewType)
-from pwnxy.globals import __registered_cmds_cls__
 
 import pwnxy.file
 from pwnxy.cmds import (Cmd, register)
@@ -14,7 +13,6 @@ from pwnxy.utils.hightlight import highlight_src
 import gdb
 from pwnxy.arch import curarch
 import pwnxy.ui
-from pwnxy.registers import AMD64_REG
 from pwnxy.config.parameters import Parameter
 from pwnxy.disasm import disassembler, Instruction
 '''GDB API
@@ -36,7 +34,7 @@ class Breakpoint:
             self.__bps = gdb.breakpoints()
         except Exception as e :
             err_print_exc(e)
-    @debug
+            
     def addr_has_bp(self, addr : int) -> bool :
         # TODO: if break at a symbol, cvt to addr
         '''
@@ -48,7 +46,6 @@ class Breakpoint:
         # NOTE: gdb also allow break a point at a decimal address but I think no one will do so,
         #     : so I assume that all bps at hexdecimal address i.e. start with "*0x"
         bps_addr : List[int] = [int(bp.location[1:].strip(), 16) for bp in self.__bps if bp.location.startswith("*0x")]
-        dbg(bps_addr)
         return any(addr == bp_addr for bp_addr in bps_addr)
 
 

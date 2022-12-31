@@ -12,7 +12,6 @@ from pwnxy.utils.hightlight import highlight_src
 import gdb
 from pwnxy.arch import curarch
 from pwnxy.ui import banner
-from pwnxy.registers import AMD64_REG
 from pwnxy.config.parameters import Parameter
 from pwnxy.prompt import current_prompt
 ''' GDB API

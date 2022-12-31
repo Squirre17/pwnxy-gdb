@@ -12,6 +12,8 @@ from pwnxy.utils.color import Color
 import gdb
 import traceback
 from pwnxy.utils.decorator import only_if_running
+from pwnxy.instruction import Instruction
+import enum
 '''GDB API
 newest_frame will return cur thread's stack frame obj  
 '''
@@ -25,7 +27,13 @@ def get_arch() :
     dbg(arch_name) # i386:x86-64
     # TODO: ELSE proc.alive
 
-
+# abstract all arch instuction
+class insttype(enum.Enum): # TEMP:
+    COND_BRA = 1 # conditional branch
+    DIRE_BRA = 2 # directly branch
+    RET      = 2
+    CALL     = 3
+    OTHER    = 4
 
 class Arch :
     arch_type  : str       = None
@@ -40,6 +48,24 @@ class Arch :
         self.arch_type = arch_type
         self.arch_size = arch_size
         self.alias = alias
+
+    # TEMP: dispatch all task to each arch handler
+    def get_type(self, inst : Instruction) -> insttype:
+        if inst.mnem.startswith("j"):
+            if inst.mnem.startswith("jmp"):
+                return insttype.DIRE_BRA
+            return insttype.COND_BRA
+        elif inst.mnem == "ret":
+            return insttype.RET
+        elif inst.mnem == "call":
+            return insttype.CALL
+        else:
+            return insttype.OTHER
+            
+        
+
+
+
 
 AMD64_ARCH = Arch("amd64", 8)
 

@@ -2,7 +2,6 @@ from enum import Enum
 from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
                     Iterator, List, NoReturn, Optional, Sequence, Set, Tuple, Type,
                     Union, NewType)
-from pwnxy.globals import __registered_cmds_cls__
 import pwnxy.file
 from pwnxy.cmds import (Cmd, register)
 from pwnxy.utils.debugger import (unwrap, assert_eq, assert_ne, todo)
@@ -17,6 +16,7 @@ from pwnxy.config.parameters import Parameter
 from pwnxy.disasm import disassembler, Instruction
 from pwnxy.utils.decorator import *
 from pwnxy.breakpoint import BPs
+from pwnxy.address import Address
 
 # TODO: context + subcmd like `context bracktrace`
 # def disasm_context() -> None: ...
@@ -58,22 +58,39 @@ class Context(Cmd):
         fmtstr = "{addr:<8s} {sym:<12s} {mnem:<6s} {operand:<10s}\n"
         fmt_list : List[str] = []
         # TODO: conditional jump, syscall
+        pivot_flag = True
+        call_prefix = ""
         for i in disasm :
-            '''
-            0x4011cb <f5+19>          pop    rbp
-            0x4011cc <f5+20>          ret    
-            0x4011cd <main+0>         endbr64 
-        ●→  0x4011d1 <main+4>         push   rbp
-            0x4011d2 <main+5>         mov    rbp, rsp
-            0x4011d5 <main+8>         mov    eax, 0x0
+            ''' CALL EXAMPLE:
+               0x4011c3 <main+45>    mov    eax, 0
+            ●→ 0x4011c8 <main+50>    call   __isoc99_scanf@plt                      <__isoc99_scanf@plt>
+                    format: 0x402008 < 0x809ce60064256425 /* '%d%d' */
+                    vararg: 0x7fffffffd670 > 0x7fffffffd770 < 0x1
+            
+               ╰→ 0x4010a4  <__isoc99_scanf@plt+4> ✔ bnd jmp qword ptr [rip + 0x2f85]     <0x401060>
+                  0x401060                          endbr64 
+                  0x401064                          push   3
+                  0x401069                          bnd jmp 0x401020                      <0x401020>
 
-        bp pc addr sym mnem oprand
+            bp pc addr sym mnem oprand
             '''
-            bp_prefix = bp_icov if BPs.addr_has_bp(i.addr) else " "
-            pc_prefix = pc_icov if pc == i.addr else " "
-            prefix = f"{bp_prefix}{pc_prefix} "
+            """ branch example
+            ●→ 0x7ffff7ddcdf6 <__cxa_atexit+22>    je     __cxa_atexit+238                <__cxa_atexit+238>
+                ↓
+               0x7ffff7ddcdfc <__cxa_atexit+28>    mov    rbx, rdi
+               0x7ffff7ddcdff <__cxa_atexit+31>    mov    eax, dword ptr fs:[0x18]
+               0x7ffff7ddce07 <__cxa_atexit+39>    lea    rbp, [rip + 0x1aa4da]         <0x7ffff7f872e8>
+               0x7ffff7ddce0e <__cxa_atexit+46>    test   eax, eax
+            """
 
-            if i.addr < pc:    # passed instruction ,fade it 
+            destination = None # for predict branch destination
+            bp_prefix   = bp_icov if BPs.addr_has_bp(i.addr) else " "
+            pc_prefix   = pc_icov if pc == i.addr else " "
+
+            prefix = f"{call_prefix}{bp_prefix}{pc_prefix} "
+            
+            if i.addr < pc and pivot_flag:    # passed instruction ,fade it 
+                prefix = f"{call_prefix}{bp_prefix}{pc_prefix} "
                 line = prefix + Color.grayify(fmtstr.format(
                     addr = hex(i.addr), 
                     sym = i.symbol,
@@ -81,13 +98,25 @@ class Context(Cmd):
                     operand = i.operand,
                 ))
             elif i.addr == pc: # hit pc ,green it
+                '''
+                IDEA: maybe nearpc can flag instruction as a predicted inst?
+                '''
+                prefix = f"{call_prefix}{bp_prefix}{pc_prefix} "
                 line = prefix + Color.greenify(fmtstr.format(
                     addr = hex(i.addr), 
                     sym = i.symbol,
                     mnem = i.mnem,
                     operand = i.operand,
                 ))
+                if i.is_call and i.dest is not None:
+                    call_prefix = " "
+                '''
+                in some call cases , called address will below the pc, and will faded
+                use pivot_flag to avoid that
+                '''
+                pivot_flag = False 
             else :             # normal
+                prefix = f"{call_prefix}{bp_prefix}{pc_prefix} "
                 line = prefix + fmtstr.format(
                     addr = hex(i.addr), 
                     sym = i.symbol,
@@ -98,9 +127,8 @@ class Context(Cmd):
             fmt_list.append(line)
         
         return pwnxy.ui.banner("DISASM") + "".join(fmt_list) # with ending '\n' 
-
+    @debug
     def __context_regs() -> str:
-        dbg("entered __context_regs")
         # TODO: ljust regs and upper
         # TODO： modified flag
         result : List[str] = []
@@ -159,10 +187,9 @@ class Context(Cmd):
             ))
 
         return pwnxy.ui.banner("src") + "\n".join(result) + "\n"
+        
     # TODO: add "at file "
-    @debug
     def __context_backtrace() -> str:
-        dbg("entered __context_backtrace")
         # TODO: ref config setting with gdb
         from collections import deque
         default_bt_cnt = 8
@@ -229,13 +256,11 @@ class Context(Cmd):
         return pwnxy.ui.banner("bt") +"\n".join(lines) + "\n"
 
     def __context_ghidra() -> str:
-        dbg("entered __context_ghidra")
         # TODO:
         ...
         return ""
     # FRATURE: 
     def __context_watchstruct() -> str:
-        dbg("entered __context_watchstruct")
         ...
         return ""
     # NOTE: ordered 

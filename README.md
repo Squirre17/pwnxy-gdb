@@ -14,6 +14,7 @@ set PHTYONPATH (maybe can in gdbinit.py?...)
 - [ ] optional open diasam reg source code and watching window
 - [ ] add some timer and other decorators
 - [ ] setup instruction cache
-
+- [ ] so
+- [ ] watchstruct modified highlight
 # TODO cmds
 - [ ] pid

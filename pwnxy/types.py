@@ -5,7 +5,6 @@ from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
                     Iterator, List, NoReturn, Optional, Sequence, Set, Tuple, Type,
                     Union, NewType)
 
-from pwnxy.globals import __registered_cmds_cls__
 import pwnxy.file
 import pwnxy.memory
 from pwnxy.cmds import (Cmd, register)

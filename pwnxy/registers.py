@@ -3,6 +3,9 @@ from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
                     Union, NewType)
 import pwnxy.arch as arch
 from pwnxy.arch import Arch
+import gdb
+# from pwnxy.utils.decorator import *
+from pwnxy.utils.output import err_print_exc
 
 __all_registers__ : Set[Type["RegCollections"]] = set()
 # TODO: add flags and seg reg
@@ -50,7 +53,5 @@ AMD64_REG = RegCollections(
     arch    = arch.AMD64_ARCH
 )
 __all_registers__.add(AMD64_REG)
-
-
 
 
