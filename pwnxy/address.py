@@ -6,7 +6,7 @@ class Address:
     '''
     accept addr of int, str, hexstr repr
     '''
-    @debug
+    
     def __init__(self, addr : Union[str, int]):
         if isinstance(addr, str):
             if addr.startswith("0X") or addr.startswith("0x"):

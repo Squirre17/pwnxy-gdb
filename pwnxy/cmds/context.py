@@ -17,6 +17,7 @@ from pwnxy.disasm import disassembler, Instruction
 from pwnxy.utils.decorator import *
 from pwnxy.breakpoint import BPs
 from pwnxy.address import Address
+from pwnxy.config import __icov_sym
 
 # TODO: context + subcmd like `context bracktrace`
 # def disasm_context() -> None: ...
@@ -43,7 +44,7 @@ class Context(Cmd):
     # TODO: colorify ,hightlight ,fade
     # TODO: arch name(option?)
     # TODO: encapulate pc
-    @debug
+
     def __context_disasm() -> str:
 
         disasm : List[Instruction] = disassembler.nearpc()
@@ -53,13 +54,14 @@ class Context(Cmd):
             err_print_exc(e)
             err("impossible for __context_disasm")
 
-        pc_icov = Color.greenify("→") # TEMP:
-        bp_icov = Color.redify("●")
+        pc_icov = Color.greenify(__icov_sym["right-arrow"]) # TEMP:
+        bp_icov = Color.redify(__icov_sym["breakpoint"])
         fmtstr = "{addr:<8s} {sym:<12s} {mnem:<6s} {operand:<10s}\n"
         fmt_list : List[str] = []
         # TODO: conditional jump, syscall
         pivot_flag = True
         call_prefix = ""
+        trun_right_arrow : str = " " + __icov_sym["trun-right-arrow"]
         for i in disasm :
             ''' CALL EXAMPLE:
                0x4011c3 <main+45>    mov    eax, 0
@@ -87,10 +89,14 @@ class Context(Cmd):
             bp_prefix   = bp_icov if BPs.addr_has_bp(i.addr) else " "
             pc_prefix   = pc_icov if pc == i.addr else " "
 
-            prefix = f"{call_prefix}{bp_prefix}{pc_prefix} "
+            prefix_fmt = "{bp_prefix:s}{pc_prefix:s}{call_prefix:s} "
             
             if i.addr < pc and pivot_flag:    # passed instruction ,fade it 
-                prefix = f"{call_prefix}{bp_prefix}{pc_prefix} "
+                prefix = prefix_fmt.format(
+                    call_prefix = call_prefix,
+                    bp_prefix = bp_prefix,
+                    pc_prefix = pc_prefix
+                )
                 line = prefix + Color.grayify(fmtstr.format(
                     addr = hex(i.addr), 
                     sym = i.symbol,
@@ -101,22 +107,32 @@ class Context(Cmd):
                 '''
                 IDEA: maybe nearpc can flag instruction as a predicted inst?
                 '''
-                prefix = f"{call_prefix}{bp_prefix}{pc_prefix} "
+                prefix = prefix_fmt.format(
+                    call_prefix = call_prefix,
+                    bp_prefix = bp_prefix,
+                    pc_prefix = pc_prefix
+                )
                 line = prefix + Color.greenify(fmtstr.format(
                     addr = hex(i.addr), 
                     sym = i.symbol,
                     mnem = i.mnem,
                     operand = i.operand,
                 ))
-                if i.is_call and i.dest is not None:
-                    call_prefix = " "
+                if (i.is_call or i.is_ret) and i.dest is not None:
+                    call_prefix = trun_right_arrow
                 '''
                 in some call cases , called address will below the pc, and will faded
                 use pivot_flag to avoid that
                 '''
                 pivot_flag = False 
             else :             # normal
-                prefix = f"{call_prefix}{bp_prefix}{pc_prefix} "
+                prefix = prefix_fmt.format(
+                    call_prefix = call_prefix,
+                    bp_prefix = bp_prefix,
+                    pc_prefix = pc_prefix
+                )
+                if call_prefix == trun_right_arrow:
+                    call_prefix = "   "
                 line = prefix + fmtstr.format(
                     addr = hex(i.addr), 
                     sym = i.symbol,
@@ -127,7 +143,7 @@ class Context(Cmd):
             fmt_list.append(line)
         
         return pwnxy.ui.banner("DISASM") + "".join(fmt_list) # with ending '\n' 
-    @debug
+        
     def __context_regs() -> str:
         # TODO: ljust regs and upper
         # TODO： modified flag

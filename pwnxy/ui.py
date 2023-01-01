@@ -7,20 +7,12 @@ from pwnxy.cmds import (Cmd, register)
 from pwnxy.utils.debugger import (unwrap, assert_eq, assert_ne, todo)
 from pwnxy.utils.output import (xy_print, info, err, note, dbg)
 from pwnxy.utils.color import Color
-
+from pwnxy.config import __icov_sym
 
 import gdb
 import os
 import termios
-__sym = {
-    "banner"               : "─",
-    "left-square-bracket"  : "[",
-    "right-square-bracket" : "]",
-    "right-arrow"          : "→",
-    "cross"                : "✘",
-    "tick"                 : "✓",
-    "breakpoint"           : "●",
-}
+
 
 def banner(title : str) -> str:
     height ,width = get_window_size()
@@ -29,7 +21,7 @@ def banner(title : str) -> str:
     # TEMP: temporary use sketchy algo to gen banner...
     retstr = ""
     for _ in range(num):
-        retstr += __sym["banner"]
+        retstr += __icov_sym["banner"]
     return Color.blueify(retstr + TITLE + retstr) + '\n'
 
 def get_window_size() -> Tuple[int ,int]:

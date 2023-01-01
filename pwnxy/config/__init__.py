@@ -15,3 +15,13 @@ PWNXY_PROMPT : List[str] = [
 
 # DEBUG: HACK: 
 
+__icov_sym = {
+    "banner"               : "─",
+    "left-square-bracket"  : "[",
+    "right-square-bracket" : "]",
+    "right-arrow"          : "→",
+    "cross"                : "✘",
+    "tick"                 : "✓",
+    "breakpoint"           : "●",
+    "trun-right-arrow"     : "╰→",
+}

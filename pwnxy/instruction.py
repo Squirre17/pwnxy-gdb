@@ -18,7 +18,7 @@ class Instruction:
                   insttype.DIRE_BRA, 
                   insttype.RET     ,
                   insttype.CALL    , ]
-    @debug
+                  
     def __init__(self, addr    : int, 
                        mnem    : str, 
                        operand : str, 
@@ -35,21 +35,7 @@ class Instruction:
         symbol = pwnxy.symbol.get(addr)
         self.__symbol = str(symbol) if symbol else ""
 
-        if self.is_branch :# b *0x401262
-            # TODO: `call $rax` not consider
-            dbg(f"mnem = {self.mnem} ,branch operand = {self.operand}")
-            if self.is_ret:
-                self.__dest = Address(pwnxy.reg.get_ra())
-            else: # dire jmp ,cond jmp , call
-                '''
-                NOTE: but `call QWORD PTR [rip+0x2f12]` can't work well,
-                      simply drop it
-                '''
-                
-                # NOTE: dest can be None even if is_branch is True
-                tmp = self.__operand.split()[0].strip()
-                if all(x in "x1234567890abcdef" for x in tmp):# TEMP: remedy 
-                    self.__dest = Address(self.__operand.split()[0].strip())
+
         
     # TEMP
     def gettype(self) -> insttype:
@@ -71,8 +57,30 @@ class Instruction:
     def addr(self) :
         return self.__addr
 
+    '''
+    must lazy fetch destination
+    '''
     @property
     def dest(self) -> Optional[Address]:
+        '''
+        WARN: dest only can be invoked in current frame
+              if mnem is `ret`, dest
+        '''
+        if self.is_branch :# b *0x401262
+            # TODO: `call $rax` not consider
+            dbg(f"mnem = {self.mnem} ,branch operand = {self.operand}")
+            if self.is_ret:
+                self.__dest = Address(pwnxy.reg.get_ra())
+            else: # dire jmp ,cond jmp , call
+                '''
+                NOTE: but `call QWORD PTR [rip+0x2f12]` can't work well,
+                      simply drop it
+                '''
+                
+                # NOTE: dest can be None even if is_branch is True
+                tmp = self.__operand.split()[0].strip()
+                if all(x in "x1234567890abcdef" for x in tmp):# TEMP: remedy 
+                    self.__dest = Address(self.__operand.split()[0].strip())
         return self.__dest
         
     @property
