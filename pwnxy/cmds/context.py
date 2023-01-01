@@ -290,6 +290,7 @@ class Context(Cmd):
     }
 
     # TODO; deal with subcmd
+    @handle
     @only_if_running
     def invoke(self, args : List[str], from_tty : bool = False) -> None:
         '''

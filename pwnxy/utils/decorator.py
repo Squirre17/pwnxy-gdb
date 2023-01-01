@@ -45,3 +45,13 @@ def debug(func : Callable) -> Callable:
         dbg(f"function -> {func.__name__} : END")
         return ret
     return wrapper
+
+import traceback
+def handle(func : Callable) -> Callable:
+    @functools.wraps(func)
+    def wrapper(*args , **kwargs) -> Any:
+        try :
+            return func(*args, **kwargs)
+        except Exception as e :
+            print(traceback.format_exc())
+    return wrapper
