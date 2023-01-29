@@ -4,11 +4,10 @@ from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
 from pwnxy.utils.debugger import (assert_eq, assert_ne, todo, debug)
 from pwnxy.utils.output import (err_print_exc, info, err, note, dbg)
 from pwnxy.utils.color import Color
+
 # import pwnxy.globals
-try:
-    import gdb
-except ModuleNotFoundError:
-    note("import gdb can't be standalon")
+import collections
+import gdb
 
 cmds : List[Type["Cmd"]] = []
 cmds_name : Set[str] = set()
@@ -100,6 +99,32 @@ class Cmd(gdb.Command):
             ...
             # TODO:
 
+class AliasCmd(gdb.Command):
+    '''
+    register all cmd aliases to gdb
+    '''
+    def __init__(self, alias     : str, 
+                 command         : str, 
+                 completer_class : int = gdb.COMPLETE_NONE, 
+                 command_class   : int = gdb.COMMAND_NONE) -> None:
+        # TODO: all aliases filter like gef
+        self.__cmd   = command
+        self.__alias = alias
+
+        if alias not in gcm.all_aliases:
+            super().__init__(
+                alias, command_class, completer_class
+            )
+            gcm.append_aliases(alias)
+        else:
+            err("alias repeat!")
+    
+    def invoke(self, args: Any, from_tty: bool) -> None:
+        gdb.execute(f"{self.__cmd} {args}")
+        
+
+
+# TODO: mv to manager
 class PwnxyCmd:
     # TODO: Maybe load task delegate top Cmd class??
     # NOTE: instantiate all registered class
@@ -123,15 +148,44 @@ def gdb_parse(s : str):
         err_print_exc(e)
     
 # TODO: Maybe have register function
+# mv it to manager
 def register(cls: Type["Cmd"]) -> Type[Cmd] :
+
     assert(issubclass(cls, Cmd))
     assert(hasattr(cls, "invoke"))
-    assert(hasattr(cls, "cmdname"))
+    assert(hasattr(cls, "cmdname"))# TODO: aliases
     assert(all(map(lambda x: x.cmdname != cls.cmdname, __registered_cmds_cls__)))
     __registered_cmds_cls__.add(cls)
+    
     return cls
 
 def show_registered_cmds():
     for i in __registered_cmds_cls__:
         dbg(f"{i}")
 
+class GdbCmdManager:
+    '''
+    manage all aliases and cmds (search only current)
+    '''
+    def __init__(self):
+        self.__aliases = []
+        self.__cmds    = collections.OrderedDict()
+
+    def append_aliases(self, alias) -> None:
+        self.__aliases.append(alias)
+        
+    @property
+    def all_aliases(self) -> List[str]:
+        return self.__aliases
+    
+    @property
+    def all_cmds(self) -> List[str]:
+        ...
+    
+    def load(self) -> None:
+        '''
+        load all plugins and cmds from starting
+        '''
+    
+
+gcm = GdbCmdManager()

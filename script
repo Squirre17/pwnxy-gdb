@@ -1,2 +1,3 @@
 so gdbinit.py
-checksec
+start
+context regs cli on

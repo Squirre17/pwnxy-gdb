@@ -6,6 +6,7 @@ import gdb
 import pathlib
 from pwnxy.utils.debugger import (dbg)
 
+
 import functools
 # TEMP: avoid circular import 
 def debug(func : Callable) -> Callable:
@@ -18,6 +19,7 @@ def debug(func : Callable) -> Callable:
     return wrapper
 
 class Process:
+
     def __init__(self):
         self.__path = None
     
@@ -50,6 +52,17 @@ class Process:
         fpath : str = gdb.current_progspace().filename
         self.__path = pathlib.Path(fpath).expanduser()
         assert self.__path is not None
+    
+
+    # TODO: make it switchable
+    @property
+    def is_use_cli(self) -> bool:
+        '''TODO: env var
+        check whether use client
+        '''
+        from pwnxy.client import pwnxy_cli
+        return pwnxy_cli.is_connected()
+
 
 
 proc = Process()

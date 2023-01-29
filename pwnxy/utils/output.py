@@ -10,7 +10,7 @@ in_debug = True
 
 def dbg(msg):
     if in_debug:
-        prompt = Color.colorify("[#]" ,"yellow")
+        prompt = Color.colorify("[#]" ,"purple")
         body   = " DBG  : "
         print(prompt + body, end = "")
         print(msg)
@@ -22,6 +22,11 @@ def err(msg):
     print(prompt + body, end = "")
     print(msg)
 
+def warn(msg):
+    prompt = Color.colorify("[-]" ,"yellow")
+    body   = " WARN : "
+    print(prompt + body, end = "")
+    print(msg)
 
 def note(msg):
     prompt = Color.colorify("[*]" ,"blue")

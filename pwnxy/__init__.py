@@ -68,10 +68,6 @@ for ln in lines:
 
 dbg("--------------DBG-TEST-----------------")
 
-dbg("prefix with `0x` => %#x" % 123)
-dbg(gdb.parse_and_eval("1+1"))
-
-assert_ne(b'', None)
 
 # ------- all cmd load by import ------
 # TODO: move to cmd __init__ and import cmd
@@ -110,6 +106,10 @@ gdb.execute("b final")
 # gdb.execute("b *0x12345")
 # gdb.execute("b *12345")
 breakpoint.print_location()
+
+from pwnxy.client import pwnxy_cli
+# pwnxy_cli.connect()
+pwnxy_cli.send("fffffff" * 10)
 # ------ ---------- ------
 
 # WARN: asdasdasd

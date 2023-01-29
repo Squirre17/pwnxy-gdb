@@ -1,6 +1,9 @@
 # gdb python demo
 DOING...
 
+Now it looks like this:
+![effect](./attachments/effect.png)
+
 # NOTE
 set PHTYONPATH (maybe can in gdbinit.py?...)
 

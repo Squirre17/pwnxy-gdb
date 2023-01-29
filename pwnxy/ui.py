@@ -7,7 +7,7 @@ from pwnxy.cmds import (Cmd, register)
 from pwnxy.utils.debugger import (unwrap, assert_eq, assert_ne, todo)
 from pwnxy.utils.output import (xy_print, info, err, note, dbg)
 from pwnxy.utils.color import Color
-from pwnxy.config import __icov_sym
+from pwnxy.config import ICOV_SYMS
 
 import gdb
 import os
@@ -21,7 +21,7 @@ def banner(title : str) -> str:
     # TEMP: temporary use sketchy algo to gen banner...
     retstr = ""
     for _ in range(num):
-        retstr += __icov_sym["banner"]
+        retstr += ICOV_SYMS["banner"]
     return Color.blueify(retstr + TITLE + retstr) + '\n'
 
 def get_window_size() -> Tuple[int ,int]:

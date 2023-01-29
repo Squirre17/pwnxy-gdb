@@ -47,7 +47,7 @@ def debug(func : Callable) -> Callable:
     return wrapper
 
 import traceback
-def handle(func : Callable) -> Callable:
+def handle_exception(func : Callable) -> Callable:
     @functools.wraps(func)
     def wrapper(*args , **kwargs) -> Any:
         try :

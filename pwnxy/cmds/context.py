@@ -3,9 +3,9 @@ from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
                     Iterator, List, NoReturn, Optional, Sequence, Set, Tuple, Type,
                     Union, NewType)
 import pwnxy.file
-from pwnxy.cmds import (Cmd, register)
+from pwnxy.cmds import (Cmd, register, AliasCmd)
 from pwnxy.utils.debugger import (unwrap, assert_eq, assert_ne, todo)
-from pwnxy.utils.output import (err_print_exc, xy_print, info, err, note, dbg)
+from pwnxy.utils.output import (err_print_exc, xy_print, info, err, note, dbg, warn)
 from pwnxy.utils.color import Color
 from pwnxy.utils.hightlight import highlight_src
 import gdb
@@ -17,7 +17,9 @@ from pwnxy.disasm import disassembler, Instruction
 from pwnxy.utils.decorator import *
 from pwnxy.breakpoint import BPs
 from pwnxy.address import Address
-from pwnxy.config import __icov_sym
+from pwnxy.config import ICOV_SYMS
+from pwnxy.client import pwnxy_cli
+from pwnxy.outs import select_ops, OutStream, OutType
 
 # TODO: context + subcmd like `context bracktrace`
 # def disasm_context() -> None: ...
@@ -34,9 +36,13 @@ class Context(Cmd):
         "context regs/disasm/code/bt/ghidra/ws", # NOTE : This need to manual maintain...
         "context regs/disasm/code/bt/ghidra/ws out" # TODO: current not
     )
+    aliases  = ['ctx']
 
     def __init__(self):
         super().__init__(self.cmdname)
+        for alias in self.aliases:
+            AliasCmd(alias, self.cmdname)
+        
         # WARN: don't use following init assignment, otherwise context will lose
         # self.context_sections = {} # TODO: orderdict? 
 
@@ -54,14 +60,14 @@ class Context(Cmd):
             err_print_exc(e)
             err("impossible for __context_disasm")
 
-        pc_icov = Color.greenify(__icov_sym["right-arrow"]) # TEMP:
-        bp_icov = Color.redify(__icov_sym["breakpoint"])
+        pc_icov = Color.greenify(ICOV_SYMS["right-arrow"]) # TEMP:
+        bp_icov = Color.redify(ICOV_SYMS["breakpoint"])
         fmtstr = "{addr:<8s} {sym:<12s} {mnem:<6s} {operand:<10s}\n"
         fmt_list : List[str] = []
         # TODO: conditional jump, syscall
         pivot_flag = True
         call_prefix = ""
-        trun_right_arrow : str = " " + __icov_sym["trun-right-arrow"]
+        trun_right_arrow : str = " " + ICOV_SYMS["trun-right-arrow"]
         for i in disasm :
             ''' CALL EXAMPLE:
                0x4011c3 <main+45>    mov    eax, 0
@@ -279,18 +285,38 @@ class Context(Cmd):
     def __context_watchstruct() -> str:
         ...
         return ""
-    # NOTE: ordered 
-    context_sections : Dict[str, Callable] = {
-        "regs"   : __context_regs,
-        "disasm" : __context_disasm,
-        "code"   : __context_code,
-        "bt"     : __context_backtrace,
-        "ghidra" : __context_ghidra,
-        "ws"     : __context_watchstruct,
-    }
 
+    class ctx_os:
+        def __init__(self, fn : Callable, os : OutStream):
+            self.__fn = fn
+            self.__os = os
+        
+        @property
+        def os(self): return self.__os
+
+        @property
+        def fn(self): return self.__fn
+
+        @fn.setter
+        def fn(self, fn): self.__fn = fn
+
+        @os.setter
+        def os(self, newos : OutStream): self.__os = newos
+        
+        @property
+        def tuple(self): return (self.__fn, self.__os)
+
+    # NOTE: ordered 
+    context_sections : Dict[str, ctx_os] = {
+        "regs"   : ctx_os(__context_regs,        select_ops()),
+        "disasm" : ctx_os(__context_disasm,      select_ops()),
+        "code"   : ctx_os(__context_code,        select_ops()),
+        "bt"     : ctx_os(__context_backtrace,   select_ops()),
+        "ghidra" : ctx_os(__context_ghidra,      select_ops()),
+        "ws"     : ctx_os(__context_watchstruct, select_ops()),
+    }
     # TODO; deal with subcmd
-    @handle
+    @handle_exception
     @only_if_running
     def invoke(self, args : List[str], from_tty : bool = False) -> None:
         '''
@@ -301,13 +327,64 @@ class Context(Cmd):
         subcmd on/off
             `context regs off/on/om(only modified)` or `context regs out`
 
-        TODO: help context 
+        NEW:
+            context regs cli on
+            context regs cli off
+
+        TODO: help context ,alias ctx
         '''
-        assert len(args) <= 3
-        result = ""
-        for title ,fn in self.context_sections.items():
-            result += fn()
-        print(result, end = "")
+
+        '''
+        convert `context regs cli on` to `['regs', 'cli', 'on']`
+        '''
+        argv = args.split() 
+        argn = len(argv)
+        self.do_invoke(argv, argn, from_tty)
+
+    def do_invoke(self, argv : List[str], argn : int, from_tty : bool = False) -> None:
+        #TODO: bind out stream with specific context
+        
+        dbg(argv) #   TODO: use match
+
+        assert argn <= 3, print(f"len(argv) is {len(argv)}")
+
+        # context regs cli on
+        if argn == 3 and argv[1] == "cli":
+            ops = ("on", "off")
+
+            sec, cli, op = (argv[i] for i in range(argn))
+
+            try :
+                ctxos = self.context_sections[sec]
+            except KeyError:
+                keys = [k for k, _ in self.context_sections.items()]
+                keys = ", ".join(keys)
+                warn(f"key must select from ({keys})")
+                return
+            
+            if op not in ops:
+                warn(f"operation must select from (on, off)")
+                return
+
+            if op == "on":
+                ctxos.os = select_ops(OutType.CLI)
+                info(f"{sec} client on")
+            elif op == "off":
+                ctxos.os = select_ops()
+                info(f"{sec} client off")
+            
+            self.context_sections[sec] = ctxos
+            return 
+                
+        elif argn == 3 and cli != "cli":
+            raise NotImplementedError
+
+
+        for title, ctxos in self.context_sections.items():
+            (fn, target) = ctxos.tuple
+            target.printout(fn())
+            
+        # print(result, end = "")
         print(pwnxy.ui.banner("END")) 
 
 
