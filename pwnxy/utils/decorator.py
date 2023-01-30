@@ -37,7 +37,7 @@ def timer(func : Callable) -> Callable:
         return ret
     return wrapper
 
-def debug(func : Callable) -> Callable:
+def debug_wrapper(func : Callable) -> Callable:
     @functools.wraps(func)
     def wrapper(*args , **kwargs) -> Any:
         dbg(f"function -> {func.__name__} : START")

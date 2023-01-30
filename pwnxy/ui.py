@@ -15,14 +15,16 @@ import termios
 
 
 def banner(title : str) -> str:
-    height ,width = get_window_size()
-    num = width // 2 - 6
-    TITLE = "[ %s ]" % title
+    # height ,width = get_window_size()
+    # num = width // 2 - 6
+    TITLEl = Color.blueify("[ ")
+    TITLEr = Color.blueify(" ] >>> ----------------" )
+    TITLEm = Color.greenify(title.upper())
     # TEMP: temporary use sketchy algo to gen banner...
     retstr = ""
-    for _ in range(num):
-        retstr += ICOV_SYMS["banner"]
-    return Color.blueify(retstr + TITLE + retstr) + '\n'
+    # for _ in range(num):
+        # retstr += ICOV_SYMS["banner"]
+    return Color.blueify(TITLEl + TITLEm + TITLEr) + '\n'
 
 def get_window_size() -> Tuple[int ,int]:
     # os.environ.get second argu is default val if first argu can't find

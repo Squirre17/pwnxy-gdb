@@ -25,7 +25,9 @@ gdb.execute (command [, from_tty [, to_string]]) ->  str | None
 '''
 
 class Cmd(gdb.Command):
+    
     builtin_override_whitelist = {'up', 'down', 'search', 'pwd', 'start'} # TODO: 
+
     def __init__(self ,cmdline : str):
         super().__init__(cmdline, gdb.COMMAND_USER) # TODO:
         # TODO:
@@ -159,14 +161,15 @@ def register(cls: Type["Cmd"]) -> Type[Cmd] :
     
     return cls
 
-def show_registered_cmds():
-    for i in __registered_cmds_cls__:
-        dbg(f"{i}")
+
 
 class GdbCmdManager:
     '''
     manage all aliases and cmds (search only current)
     '''
+
+    name2obj : Dict[str, Type["Cmd"]] = {}
+
     def __init__(self):
         self.__aliases = []
         self.__cmds    = collections.OrderedDict()
@@ -182,10 +185,23 @@ class GdbCmdManager:
     def all_cmds(self) -> List[str]:
         ...
     
+    def getobj(self, name : str) -> Optional[Type["Cmd"]]:
+        try:
+            return self.name2obj[name] # TODO: default dict
+        except KeyError:
+            return None
+    
+    def show_registered_cmds(self):
+        for name, obj in self.name2obj.items():
+            dbg(f"{name} -> {obj}")
+
     def load(self) -> None:
         '''
         load all plugins and cmds from starting
         '''
+        dbg(f"__registered_cmds_cls__ is {__registered_cmds_cls__}")
+        for rcc in __registered_cmds_cls__:
+            self.name2obj[rcc.cmdname] = rcc()
     
 
 gcm = GdbCmdManager()

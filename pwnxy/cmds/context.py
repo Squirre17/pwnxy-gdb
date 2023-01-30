@@ -18,7 +18,6 @@ from pwnxy.utils.decorator import *
 from pwnxy.breakpoint import BPs
 from pwnxy.address import Address
 from pwnxy.config import ICOV_SYMS
-from pwnxy.client import pwnxy_cli
 from pwnxy.outs import select_ops, OutStream, OutType
 
 # TODO: context + subcmd like `context bracktrace`
@@ -315,6 +314,33 @@ class Context(Cmd):
         "ghidra" : ctx_os(__context_ghidra,      select_ops()),
         "ws"     : ctx_os(__context_watchstruct, select_ops()),
     }
+    # expose a interface to cli
+    def ctx_cli_set(self, sec : str, op : str, name : str) -> None:
+        '''
+        account for validity check
+        '''
+        try :
+            ctxos = self.context_sections[sec]
+        except KeyError:
+            keys = [k for k, _ in self.context_sections.items()]
+            keys = ", ".join(keys)
+            warn(f"key must select from ({keys})")
+            return
+
+        if op not in ("on", "off"):
+            warn(f"operation must select from (on, off)")
+            return
+
+        if op == "on":
+            ctxos.os = select_ops(OutType.CLI, name)
+            info(f"{sec} client on")
+        elif op == "off":
+            ctxos.os = select_ops()
+            info(f"{sec} client off")
+        
+        self.context_sections[sec] = ctxos
+
+
     # TODO; deal with subcmd
     @handle_exception
     @only_if_running
@@ -327,15 +353,7 @@ class Context(Cmd):
         subcmd on/off
             `context regs off/on/om(only modified)` or `context regs out`
 
-        NEW:
-            context regs cli on
-            context regs cli off
-
         TODO: help context ,alias ctx
-        '''
-
-        '''
-        convert `context regs cli on` to `['regs', 'cli', 'on']`
         '''
         argv = args.split() 
         argn = len(argv)
@@ -348,39 +366,7 @@ class Context(Cmd):
 
         assert argn <= 3, print(f"len(argv) is {len(argv)}")
 
-        # context regs cli on
-        if argn == 3 and argv[1] == "cli":
-            ops = ("on", "off")
-
-            sec, cli, op = (argv[i] for i in range(argn))
-
-            try :
-                ctxos = self.context_sections[sec]
-            except KeyError:
-                keys = [k for k, _ in self.context_sections.items()]
-                keys = ", ".join(keys)
-                warn(f"key must select from ({keys})")
-                return
-            
-            if op not in ops:
-                warn(f"operation must select from (on, off)")
-                return
-
-            if op == "on":
-                ctxos.os = select_ops(OutType.CLI)
-                info(f"{sec} client on")
-            elif op == "off":
-                ctxos.os = select_ops()
-                info(f"{sec} client off")
-            
-            self.context_sections[sec] = ctxos
-            return 
-                
-        elif argn == 3 and cli != "cli":
-            raise NotImplementedError
-
-
-        for title, ctxos in self.context_sections.items():
+        for _ , ctxos in self.context_sections.items():
             (fn, target) = ctxos.tuple
             target.printout(fn())
             

@@ -76,6 +76,7 @@ import pwnxy.cmds.vmmap
 import pwnxy.cmds.x
 import pwnxy.cmds.context
 import pwnxy.cmds.checksec
+import pwnxy.cmds.cli
 # -------------------------------------
 
 # aslr()
@@ -83,11 +84,10 @@ import pwnxy.cmds.checksec
 # dbg(int(b"1"))
 
 
-from pwnxy.cmds import show_registered_cmds, PwnxyCmd
+from pwnxy.cmds import gcm
 
-pcmd = PwnxyCmd()
-pcmd.__inst_all__() # TODO: maybe can register & instantiate at same time?
-
+gcm.load()
+gcm.show_registered_cmds()
 # gdb.execute("b final")
 # gdb.execute("c")
 
@@ -96,20 +96,19 @@ from pwnxy.config.parameters import Parameter
 Parameter("squ", 1, "123", "456")
 from pwnxy.hook import register_all_hooks
 register_all_hooks()
-from pwnxy.utils.decorator import debug, timer
+from pwnxy.utils.decorator import debug_wrapper, timer
 # gdb.execute("start")
 
 import pwnxy.breakpoint as breakpoint
 
 # dbg(breakpoint.get())
-gdb.execute("b final")
+# gdb.execute("b final")
 # gdb.execute("b *0x12345")
 # gdb.execute("b *12345")
 breakpoint.print_location()
 
-from pwnxy.client import pwnxy_cli
-# pwnxy_cli.connect()
-pwnxy_cli.send("fffffff" * 10)
+
+# cli = gcm.getobj("cli")
 # ------ ---------- ------
 
 # WARN: asdasdasd

@@ -24,6 +24,7 @@ import base64
 
 port = NewType("port", int) 
 # TEMP: reconstruct it
+@deprecated
 class Client:
 
     successful = False
@@ -43,12 +44,13 @@ class Client:
 
 
     def send(self, msg: str) -> bool:
+
         # TODO:
         msg = base64.b64encode(msg.encode())
         try :
             r = requests.post(url = "http://127.0.0.1:8080/echo", data = msg)
         except requests.exceptions.ConnectionError:
-            err("connection error, can't use client")
+            err("connection error, can't use client send")
             return 
 
         dbg(f"{r.text}")
@@ -68,7 +70,6 @@ class Client:
     def __TODO__(self):
         self.sd.close()
 
-pwnxy_cli = Client()
 
 
 

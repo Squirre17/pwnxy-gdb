@@ -7,7 +7,7 @@ import gdb
 import elftools
 import pathlib
 from pwnxy.external import Shell
-from pwnxy.utils.decorator import debug
+from pwnxy.utils.decorator import debug_wrapper
 from pwnxy.utils.output import dbg
 class ELF:
     __sec_protection : Dict[str, bool] = {}

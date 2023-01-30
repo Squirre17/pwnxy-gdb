@@ -6,7 +6,7 @@ from pwnxy.address import Address
 import pwnxy.symbol
 from pwnxy.utils.output import (dbg, err_print_exc,err)
 import pwnxy.reg 
-from pwnxy.utils.decorator import (debug)
+from pwnxy.utils.decorator import (debug_wrapper)
 class insttype(enum.Enum): # TEMP:
     COND_BRA = 1 # conditional branch
     DIRE_BRA = 2 # directly branch

@@ -17,7 +17,7 @@ import enum
 from pwnxy.address import Address
 import pwnxy.reg
 from pwnxy.instruction import Instruction
-from pwnxy.utils.decorator import (debug)
+from pwnxy.utils.decorator import (debug_wrapper)
 
 
 # TODO: internel use , add underscore
