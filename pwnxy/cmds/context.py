@@ -314,6 +314,7 @@ class Context(Cmd):
         "ghidra" : ctx_os(__context_ghidra,      select_ops()),
         "ws"     : ctx_os(__context_watchstruct, select_ops()),
     }
+    
     # expose a interface to cli
     def ctx_cli_set(self, sec : str, op : str, name : str) -> None:
         '''

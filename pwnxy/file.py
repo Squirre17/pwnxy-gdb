@@ -22,7 +22,6 @@ def get_text(path : str) -> Optional[str] :
     '''
     get contents of the specified full local file path by text
     '''
-    dbg(f"get_text path is {path}")
     try :
         with open(path, 'r') as f:
             return f.read()

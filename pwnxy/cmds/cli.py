@@ -60,7 +60,6 @@ class Cli(Cmd):
         '''
         cli must be enabled by user before use it
         '''
-        dbg("enable_decorater")
         @functools.wraps(func)
         def wrapper(*args, **kwargs) -> Any:
             dbg(f"args[0] is {args[0]}")
@@ -195,4 +194,4 @@ class Cli(Cmd):
         return 
 
     def __TODO__(self):
-        self.sd.close()
+        self.sd.close() # TODO: current alreadly not?
