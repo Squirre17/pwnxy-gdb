@@ -37,11 +37,44 @@ This command is not documented.
 class Parameter(gdb.Parameter):
     '''
     TODO: this is document
+    TODO: may be  it need to judge name repeat
     '''
-    def __init__(self, argname, default_val, setdesc : str = "", docdesc : str = ""):
-        self.set_doc = docdesc
-        self.show_doc = setdesc
-        super().__init__(argname, 
-                         gdb.COMMAND_SUPPORT,
-                         get_gdb_param_by_type(type(default_val)))
+    def __init__(self, argname, default_val, docdesc : str = ""):
+        # TODO: maybe register repeat detect?
+        '''
+        # pwnxy @ main > help set max_code_line
+        set the maxs count of lines of context of source code
+        '''
+        self.set_doc = "set " + docdesc
+        '''
+        # pwnxy @ main > show max_code_line 
+        the maxs count of lines of context of source code: 14
+        '''
+        self.show_doc = docdesc + " :"
+        self.name     = argname.replace("_", "-") # gdb support dash sign
+        
+        super().__init__(
+            argname,
+            gdb.COMMAND_SUPPORT,
+            get_gdb_param_by_type(type(default_val))
+        )
+        self.value = default_val
+    
+    def __int__(self):
+        return int(self.value)
+
+    def __str__(self):
+        return str(self.value)
+
+    def __bool__(self):
+        return bool(self.value)
+    
+    def __eq__(self, other) -> bool:
+        return self.value == other
+    
+    def __lt__(self, other) -> bool:
+        return self.value < other
+    
+
+
         

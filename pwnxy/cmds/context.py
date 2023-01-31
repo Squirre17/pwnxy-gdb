@@ -19,6 +19,13 @@ from pwnxy.breakpoint import BPs
 from pwnxy.address import Address
 from pwnxy.config import ICOV_SYMS
 from pwnxy.outs import select_ops, OutStream, OutType
+from pwnxy.monitor import memory_monitor
+
+max_code_line = Parameter(
+    argname = "max-code-line", 
+    default_val = 14, 
+    docdesc = "the maxs count of lines of context of source code"
+)
 
 # TODO: context + subcmd like `context bracktrace`
 # def disasm_context() -> None: ...
@@ -53,11 +60,9 @@ class Context(Cmd):
     def __context_disasm() -> str:
 
         disasm : List[Instruction] = disassembler.nearpc()
-        try:
-            pc = int(gdb.selected_frame().pc())
-        except Exception as e:
-            err_print_exc(e)
-            err("impossible for __context_disasm")
+
+        pc = int(gdb.selected_frame().pc())
+
 
         pc_icov = Color.greenify(ICOV_SYMS["right-arrow"]) # TEMP:
         bp_icov = Color.redify(ICOV_SYMS["breakpoint"])
@@ -183,8 +188,10 @@ class Context(Cmd):
         pivot_line = sal.line # PUZZ: seems like current line
         src : List[str] = highlight_src(src.split("\n"))
 
-        start_line    = max(pivot_line - 3, 0) # TODO: complexify
-        end_line      = min(pivot_line + 7, len(src)) # TODO: complexify
+        offset = int(max_code_line) // 2
+
+        start_line    = max(pivot_line - offset, 0) # TODO: complexify
+        end_line      = min(pivot_line + offset, len(src)) # TODO: complexify
         ln_width      = len(str(end_line))
         prefix_symbol = "→"         # TODO: mv to config
         prefix_width  = len(prefix_symbol)
@@ -192,6 +199,7 @@ class Context(Cmd):
         src = src[start_line : end_line]
         fmt = '{prefix:{prefix_width}} {line_number:>{ln_width}} {code}'
         result : List[str] = []
+
         for ln_num, code in enumerate(src, start = start_line + 1) :
             if ln_num == pivot_line:
                 prefix = prefix_symbol
@@ -248,11 +256,9 @@ class Context(Cmd):
         # TODO: addr highlight
         
         while cur_frame:
-            try :
-                cur_args = gdb.FrameDecorator.FrameDecorator(cur_frame).frame_args()
-            except Exception as e:
-                err_print_exc(e)
-            
+
+            cur_args = gdb.FrameDecorator.FrameDecorator(cur_frame).frame_args()
+
             # assert cur_args is not None
             # TODO: cur_args maybe be None
             if cur_args is None:
@@ -307,14 +313,14 @@ class Context(Cmd):
 
     # NOTE: ordered 
     context_sections : Dict[str, ctx_os] = {
-        "regs"   : ctx_os(__context_regs,        select_ops()),
-        "disasm" : ctx_os(__context_disasm,      select_ops()),
-        "code"   : ctx_os(__context_code,        select_ops()),
-        "bt"     : ctx_os(__context_backtrace,   select_ops()),
-        "ghidra" : ctx_os(__context_ghidra,      select_ops()),
-        "ws"     : ctx_os(__context_watchstruct, select_ops()),
+        "regs"   : ctx_os(__context_regs        ,select_ops()),
+        "disasm" : ctx_os(__context_disasm      ,select_ops()),
+        "code"   : ctx_os(__context_code        ,select_ops()),
+        "bt"     : ctx_os(__context_backtrace   ,select_ops()),
+        "ghidra" : ctx_os(__context_ghidra      ,select_ops()),
+        "ws"     : ctx_os(__context_watchstruct ,select_ops()),
     }
-    
+
     # expose a interface to cli
     def ctx_cli_set(self, sec : str, op : str, name : str) -> None:
         '''
@@ -342,7 +348,6 @@ class Context(Cmd):
         self.context_sections[sec] = ctxos
 
 
-    # TODO; deal with subcmd
     @handle_exception
     @only_if_running
     def invoke(self, args : List[str], from_tty : bool = False) -> None:
@@ -353,7 +358,7 @@ class Context(Cmd):
             context code
         subcmd on/off
             `context regs off/on/om(only modified)` or `context regs out`
-
+            
         TODO: help context ,alias ctx
         '''
         argv = args.split() 
@@ -365,13 +370,15 @@ class Context(Cmd):
         
         dbg(argv) #   TODO: use match
 
-        assert argn <= 3, print(f"len(argv) is {len(argv)}")
+        if argn > 3:
+            warn(f"arguments too many")
+            self.usage(self)
+            return
 
         for _ , ctxos in self.context_sections.items():
             (fn, target) = ctxos.tuple
             target.printout(fn())
             
-        # print(result, end = "")
         print(pwnxy.ui.banner("END")) 
 
 

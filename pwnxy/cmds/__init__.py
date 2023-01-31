@@ -32,9 +32,16 @@ class Cmd(gdb.Command):
         super().__init__(cmdline, gdb.COMMAND_USER) # TODO:
         # TODO:
     # TODO: return type use?
-    def __usage__(self) -> None:
-        # TODO:
-        ...
+
+    @staticmethod
+    def usage(obj):
+
+        assert isinstance(obj, Cmd)
+        
+        note("usage examples :")
+        for i in obj.examples:
+            print('\t   ' + i)
+
     def __init_subclass__(cls) -> None:
         return super().__init_subclass__()
 
@@ -127,6 +134,7 @@ class AliasCmd(gdb.Command):
 
 
 # TODO: mv to manager
+@DeprecationWarning
 class PwnxyCmd:
     # TODO: Maybe load task delegate top Cmd class??
     # NOTE: instantiate all registered class
@@ -135,7 +143,6 @@ class PwnxyCmd:
         Load all cmd to gdb
         '''
         args = []
-        dbg(f"__registered_cmds_cls__ is {__registered_cmds_cls__}")
         for rcc in __registered_cmds_cls__:
             rcc()
 
@@ -199,7 +206,6 @@ class GdbCmdManager:
         '''
         load all plugins and cmds from starting
         '''
-        dbg(f"__registered_cmds_cls__ is {__registered_cmds_cls__}")
         for rcc in __registered_cmds_cls__:
             self.name2obj[rcc.cmdname] = rcc()
     

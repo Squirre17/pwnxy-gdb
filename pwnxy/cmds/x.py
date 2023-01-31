@@ -130,7 +130,8 @@ class WX(X):
         argv = args.split()
         'wx 0x400000 4 => x/4wx 0x400000'
         if len(argv) == 0 :
-            err("too few arguments") # TODO ERR type
+            note("too few arguments") # TODO ERR type
+            self.usage()
             return 
         elif len(argv) == 1 :
             num = "8"      # default value

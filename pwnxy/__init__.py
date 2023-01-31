@@ -37,11 +37,7 @@ pre_exec_cmds = """
 
 for cmd in pre_exec_cmds.strip().splitlines():
     gdb.execute(cmd)
-    info(f"gdb executed `{cmd}`")
 
-from pwnxy.config import PWNXY_PROMPT # TODO : RM this
-# TODO: temporary to choice
-# gdb.execute(f"set prompt {PWNXY_PROMPT[0]}")
 
 # TODO: maybe sometime can't disasm to intel format ?
 try:
@@ -77,11 +73,8 @@ import pwnxy.cmds.x
 import pwnxy.cmds.context
 import pwnxy.cmds.checksec
 import pwnxy.cmds.cli
+import pwnxy.cmds.mm
 # -------------------------------------
-
-# aslr()
-# assert_eq(b"a\n".strip(), b"a")
-# dbg(int(b"1"))
 
 
 from pwnxy.cmds import gcm
@@ -93,21 +86,23 @@ gcm.show_registered_cmds()
 
 
 from pwnxy.config.parameters import Parameter
-Parameter("squ", 1, "123", "456")
+# Parameter(argname = "squ", default_val = 1, setdesc = "123",docdesc = "456") # TEMP:
 from pwnxy.hook import register_all_hooks
 register_all_hooks()
-from pwnxy.utils.decorator import debug_wrapper, timer
-# gdb.execute("start")
 
-import pwnxy.breakpoint as breakpoint
+import pwnxy.exception
+# gdb.execute("set exception-debugger on")
+try :
+    raise NotImplementedError
+except :
+    pwnxy.exception.handle()
 
-# dbg(breakpoint.get())
-# gdb.execute("b final")
-# gdb.execute("b *0x12345")
-# gdb.execute("b *12345")
-breakpoint.print_location()
-
-
+from pwnxy.monitor import memory_monitor
+gdb.execute("start")
+hs = memory_monitor.add(0x7fffffffd908)
+print(memory_monitor.read(hs))
+gdb.execute("mm add 0x7fffffffd908")
+gdb.execute("mm show")
 # cli = gcm.getobj("cli")
 # ------ ---------- ------
 

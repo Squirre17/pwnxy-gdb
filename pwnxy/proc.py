@@ -60,8 +60,7 @@ class Process:
         '''TODO: env var
         check whether use client
         '''
-        from pwnxy.client import pwnxy_cli
-        return pwnxy_cli.is_connected()
+        raise ValueError
 
 
 

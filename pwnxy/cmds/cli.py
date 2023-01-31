@@ -62,8 +62,7 @@ class Cli(Cmd):
         '''
         @functools.wraps(func)
         def wrapper(*args, **kwargs) -> Any:
-            dbg(f"args[0] is {args[0]}")
-            # args[0] is self
+            
             if args[0].enabled:
                 return func(*args, **kwargs)
             else:
@@ -99,7 +98,13 @@ class Cli(Cmd):
 
     @enable_decorater
     def show(self, argv : List[str]) -> None:
-        raise NotImplementedError
+
+        if not self.name2port:
+            warn("Not have cli currently")
+            return 
+            
+        for n, p in self.name2port.items():
+            print(f"{n:<8} ->\t{p}")
 
     def update_n2p(self):
         '''
@@ -122,7 +127,7 @@ class Cli(Cmd):
                 port = int(f.read().strip())
                 self.name2port[i.name] = port
 
-    name2port = defaultdict(lambda: None)
+    name2port = dict()
 
     def on(self, argv : List[str]) -> None:
 
@@ -133,7 +138,7 @@ class Cli(Cmd):
             return
         
         d = Path(pwnxy_cli_path, "pwnxy_cli_sync")
-        dbg(f"d is {d}")
+        note(f"found sync dir in {d}")
 
         if not d.is_dir():
             warn("target {d} can't access as a directory")
@@ -149,6 +154,7 @@ class Cli(Cmd):
 
         self.name2port.clear()
         self.enabled = False
+        note("cli off")
 
     ops2f = {
         "set" : set  , 
@@ -161,6 +167,12 @@ class Cli(Cmd):
 
         if argn > 4:
             warn("arguments number too many")
+            self.usage(self)
+            return
+
+        if argn <= 0:
+            warn("arguments number too few")
+            self.usage(self)
             return
 
         op, argv = argv[0], argv[1:]

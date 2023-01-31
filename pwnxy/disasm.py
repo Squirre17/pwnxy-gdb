@@ -19,6 +19,17 @@ import pwnxy.reg
 from pwnxy.instruction import Instruction
 from pwnxy.utils.decorator import (debug_wrapper)
 
+backward_num = Parameter(
+    argname      = "disasm-backward-num",
+    default_val  = 5,
+    docdesc      = "disassembly instruction backward count in DISASM context"
+)
+
+forward_num = Parameter(
+    argname      = "disasm-forward-num",
+    default_val  = 8,
+    docdesc      = "disassembly instruction forward count in DISASM context"
+)
 
 # TODO: internel use , add underscore
 # instantiate it to object
@@ -122,8 +133,6 @@ class Disassembler(InstructionCache):
         '''
         # TODO: check the pc validity
         # TODO: maybe pc can directly obtain don't need of arg
-        backward_num = 3 # TEMP:
-        forward_num = 7
         try:
             pc = int(gdb.selected_frame().pc())
         except Exception as e:
@@ -132,11 +141,11 @@ class Disassembler(InstructionCache):
         NOTE: pwndbg use unicore to emulate execute for branch predict which I don't support now
               so I only get branch instruction in call
         '''
-        passed_insts = self.backward_fetch(pc, backward_num)
+        passed_insts = self.backward_fetch(pc, int(backward_num))
         cur : Instruction = self.get(pc)
         fwd_insts : List[Instruction] = [cur]
 
-        for _ in range(forward_num):
+        for _ in range(int(forward_num)):
             if cur.is_call and cur.dest is not None:
                 dbg(f"cur.dest = {str(cur.dest)}")
                 cur = self.get(cur.dest)

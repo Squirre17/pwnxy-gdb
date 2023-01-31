@@ -35,10 +35,16 @@ class insttype(enum.Enum): # TEMP:
     CALL     = 3
     OTHER    = 4
 
+class Endianness:
+    LIT = 1
+    BIG = 2
+
 class Arch :
-    arch_type  : str       = None
-    arch_size  : int       = None
-    alias      : List[str] = None
+
+    endiness   : Endianness = None
+    arch_type  : str        = None
+    arch_size  : int        = None
+    alias      : List[str]  = None
 
     def __init__(self,
         arch_type  : str,
@@ -64,10 +70,22 @@ class Arch :
             
         
 
+class AMD64(Arch):
+
+    def __init__(
+        self,
+        arch_type  : str,
+        arch_size  : int,
+        alias      : List[str] = None
+    ):
+        super().__init__(arch_type, arch_size, alias)
+        self.__endiness = Endianness.LIT
+    
+    @property
+    def endiness(self): return self.__endiness
 
 
-
-AMD64_ARCH = Arch("amd64", 8)
+AMD64_ARCH = AMD64("amd64", 8)
 
 # TEMP: 
 curarch = AMD64_ARCH

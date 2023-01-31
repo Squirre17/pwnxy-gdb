@@ -3,31 +3,47 @@ memory peek poke operations,
 '''
 import traceback
 import pwnxy.memory
-
+from loguru import logger
 from typing import (List, Optional, Union)
 
 
 from pwnxy.utils.debugger import (unwrap, assert_eq, assert_ne, todo)
 from pwnxy.utils.output import (err_print_exc, xy_print, info, err, note, dbg)
 from pwnxy.utils.color import Color
-
+from pwnxy.address import Address
+from pwnxy.utils.decorator import *
 import gdb
 import traceback
+from pwnxy.arch import curarch, Endianness
 
-def read(addr : int, size : int) -> bytearray :
+@only_if_running
+def read(addr : Address, size : int) -> int :
+
     assert size > 0 and size <= 8, "size error"
+    
     try :
         val : memoryview = gdb.selected_inferior().read_memory(addr, size)
     except Exception as e :
         err(f"TODO {e}")
         traceback.print_exc()
-    return bytearray(val)
+    
+    # do arch convert here ,ease the burden of upstream functions
+    # TODO: check
+    if curarch.endiness == Endianness.BIG:
+        logger.debug(f"read value is {int.from_bytes(bytearray(val), 'big')}")
+        return int.from_bytes(bytearray(val), "big")
+    elif curarch.endiness == Endianness.LIT:
+        logger.debug(f"read value is {int.from_bytes(bytearray(val), 'little')}")
+        return int.from_bytes(bytearray(val), "little")
+    else:
+        logger.error("Unreachable")
 
 # TODO: gdbtype became a enum
 '''GDB API
     Value.cast (type): hat is the result of casting this instance to the type ,type must be a `gdb.Type` object. 
     Value.dereference(): get content of given addr
 '''
+@only_if_running
 def read_by_type(addr, gdb_type) -> int:
     value = gdb.Value(addr)
     try:
@@ -37,6 +53,7 @@ def read_by_type(addr, gdb_type) -> int:
 
     return int(value.dereference())
 
+@only_if_running
 def write(addr : int, size : int, value : Union[int, str, bytes]) -> None :
     assert size > 0 and size <= 8, "size error"
     if isinstance(value, int) :
@@ -56,10 +73,12 @@ def write(addr : int, size : int, value : Union[int, str, bytes]) -> None :
     except Exception as e :
         err_print_exc(e)
         
-
-def is_access(addr : int) -> bool:
+# NOTE: this addr use int rather than Address cuz all Address will
+# use this for accessible check
+@only_if_running
+def can_access(addr : int) -> bool:
     '''
-    check whether access in given memory address
+    check whether accessible in given memory address
     '''
     try : 
         read(addr, 1)

@@ -6,7 +6,7 @@ from pwnxy.arch import Arch
 import gdb
 # from pwnxy.utils.decorator import *
 from pwnxy.utils.output import err_print_exc
-
+# TODO : only server for Arch and only called by arch !!!
 __all_registers__ : Set[Type["RegCollections"]] = set()
 # TODO: add flags and seg reg
 class RegCollections :
