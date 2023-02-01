@@ -2,6 +2,7 @@ from typing import Optional
 class Color:
     """Used to colorify terminal output."""
     colors = {
+        "normal"         : "",
         "reset"          : "\033[0m",
         "gray"           : "\033[1;38;5;240m",
         "light_gray"     : "\033[0;37m",

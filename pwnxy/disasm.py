@@ -4,7 +4,7 @@ from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
 import pwnxy.file
 from pwnxy.cmds import (Cmd, register)
 from pwnxy.utils.debugger import (unwrap, assert_eq, assert_ne, todo)
-from pwnxy.utils.output import (err_print_exc, xy_print, info, err, note, dbg)
+from pwnxy.utils.output import (err_print_exc, info, err, note, dbg)
 from pwnxy.utils.color import Color
 from pwnxy.utils.hightlight import highlight_src
 import gdb
@@ -81,7 +81,7 @@ class Disassembler(InstructionCache):
 
     def get(self, addr : Address, count : int = 1) -> Union[List[Instruction], Instruction] :
         '''
-        get can take in data of Address obj
+        `get` can take in data of Address obj,
         temporary use gdb internal disassembler
         if count not specify(default to 1), return a Instruction rather than a List
         '''

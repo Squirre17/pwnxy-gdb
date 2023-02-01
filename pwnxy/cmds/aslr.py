@@ -4,7 +4,7 @@ from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
 import pwnxy.file
 from pwnxy.cmds import (Cmd, register)
 from pwnxy.utils.debugger import (unwrap, assert_eq, assert_ne, todo)
-from pwnxy.utils.output import (xy_print, info, err, note, dbg)
+from pwnxy.utils.output import (info, err, note, dbg)
 from pwnxy.utils.color import Color
 
 try:
@@ -33,7 +33,7 @@ def check_aslr() -> Tuple[str ,str]:
     
 def aslr():
     retstr, status = check_aslr()
-    xy_print(f"ASLR is ({status}), {retstr}")
+    note(f"ASLR is ({status}), {retstr}")
 
 @register
 class AslrCmd(Cmd):

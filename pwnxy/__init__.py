@@ -73,7 +73,9 @@ import pwnxy.cmds.x
 import pwnxy.cmds.context
 import pwnxy.cmds.checksec
 import pwnxy.cmds.cli
-import pwnxy.cmds.mm
+import pwnxy.cmds.monitormem
+import pwnxy.cmds.telescope
+# import pwnxy.cmds.stack
 # -------------------------------------
 
 
@@ -104,6 +106,13 @@ print(memory_monitor.read(hs))
 gdb.execute("mm add 0x7fffffffd908")
 gdb.execute("mm show")
 # cli = gcm.getobj("cli")
+from pwnxy.types import typeset
+# print(gdb.Value(0x7fffffffd908).cast(typeset.ppvoid.pointer()).dereference())
+import pwnxy.memory
+print(hex(pwnxy.memory.deref(0x7fffffffd908, typeset.ppvoid)))
+# print(gdb.lookup_type("ubyte"))
+from pwnxy.hignlight import asm
+print(asm("mov edi,eax"))
 # ------ ---------- ------
 
 # WARN: asdasdasd

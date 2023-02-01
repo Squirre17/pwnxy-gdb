@@ -54,4 +54,8 @@ AMD64_REG = RegCollections(
 )
 __all_registers__.add(AMD64_REG)
 
-
+def get(reg : str) -> int :
+    '''
+    obtain a value from given register name.
+    '''
+    return int(gdb.parse_and_eval("$" + reg))

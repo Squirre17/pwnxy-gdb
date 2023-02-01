@@ -35,10 +35,6 @@ def note(msg):
     print(msg)
 
 
-def xy_print(*args):
-    print("[XYPRINT] : ", end = "")
-    print(*args)
-
 def err_print_exc(msg):
     err(msg)
     traceback.print_exc()

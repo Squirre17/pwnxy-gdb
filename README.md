@@ -19,5 +19,9 @@ set PHTYONPATH (maybe can in gdbinit.py?...)
 - [x] setup instruction cache
 - [ ] so
 - [ ] watchstruct modified highlight
+- [ ] add a dereference to Address class
+- [ ] encapsulate vmmap to memory
+- [ ] add config parameter which not expose to user
+- [ ] only_if_running will cause the intelligent prompt error
 # TODO cmds
 - [ ] pid

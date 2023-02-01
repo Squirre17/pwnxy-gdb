@@ -4,7 +4,7 @@ from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
 import pwnxy.file
 from pwnxy.cmds import (Cmd, register)
 from pwnxy.utils.debugger import (unwrap, assert_eq, assert_ne, todo)
-from pwnxy.utils.output import (xy_print, info, err, note, dbg)
+from pwnxy.utils.output import (info, err, note, dbg)
 from pwnxy.utils.color import Color
 import gdb
 from collections import OrderedDict

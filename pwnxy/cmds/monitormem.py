@@ -4,8 +4,8 @@ from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
                     Union, NewType)
 import pwnxy.file
 from pwnxy.cmds import (Cmd, register, AliasCmd)
-from pwnxy.utils.debugger import (unwrap, assert_eq, assert_ne, todo)
-from pwnxy.utils.output import (err_print_exc, xy_print, info, err, note, dbg, warn)
+from pwnxy.utils.debugger import (assert_eq, assert_ne, todo)
+from pwnxy.utils.output import (err_print_exc, info, err, note, dbg, warn)
 from pwnxy.utils.color import Color
 from pwnxy.utils.hightlight import highlight_src
 import gdb
@@ -22,6 +22,7 @@ from pwnxy.outs import select_ops, OutStream, OutType
 from pwnxy.monitor import memory_monitor
 from loguru import logger
 
+debug = 1
 
 @register
 class MonitorMem(Cmd):
@@ -48,7 +49,8 @@ class MonitorMem(Cmd):
     def show(self, argv : List[str], argc : int):
 
         if self.mmtab == []:
-            note("No monitored memory now")
+            if debug:
+                note("No monitored memory now")
             return
         
         single_fmt = "0x{:016x}"
@@ -59,22 +61,34 @@ class MonitorMem(Cmd):
         lines = []
 
         for hash, addr in self.mmtab:
+
             mems : List[Tuple[int, bool]] = memory_monitor.read(hash)
             line_count = len(mems) // 2
 
             for i in range(line_count):
+                
                 lines.append(fmt.format(
-                    a = Color.blueify(single_fmt.format(int(addr) + 16 * i)),
+                    a = Color.blueify("{:#x}".format(int(addr) + 16 * i)),
                     b = _c(int(mems[i*2][0]), mems[i*2][1]),
                     c = _c(int(mems[i*2+1][0]), mems[i*2+1][1]),
                 ))
 
-        for l in lines: # complexify
-            print(l)
+        result = pwnxy.ui.banner("MM") + "\n".join(lines) + "\n"
 
+        self.outstream.printout(result)
         
-
+    def mm_cli_set(self, name : str, op = "on") -> None:
+        '''
+        expose a interface to cli
+        '''
+        if op == "on":
+            self.outstream = select_ops(OutType.CLI, name)
+        elif op == "off":
+            self.outstream = select_ops()
+        else:
+            logger.error("unreachable")
         
+        note(f"monitor mem is relay ({op})")
     
     def add(self, argv : List[str], argc : int):
         
@@ -137,6 +151,7 @@ class MonitorMem(Cmd):
         # PUZZ: why not generate optab here
         self.optab = (k for k, _ in self.op2fn.items())
         # for i in self.optab:
+        self.outstream = select_ops()
 
         super().__init__(self.cmdname)
         for alias in self.aliases:

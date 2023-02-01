@@ -7,17 +7,17 @@ import pwnxy.symbol
 from pwnxy.utils.output import (dbg, err_print_exc,err)
 import pwnxy.reg 
 from pwnxy.utils.decorator import (debug_wrapper)
-class insttype(enum.Enum): # TEMP:
+class inst_type(enum.Enum): # TEMP:
     COND_BRA = 1 # conditional branch
     DIRE_BRA = 2 # directly branch
     RET      = 2
     CALL     = 3
     OTHER    = 4
 class Instruction:
-    __bra_grp = [ insttype.COND_BRA,
-                  insttype.DIRE_BRA, 
-                  insttype.RET     ,
-                  insttype.CALL    , ]
+    __bra_grp = [ inst_type.COND_BRA,
+                  inst_type.DIRE_BRA, 
+                  inst_type.RET     ,
+                  inst_type.CALL    , ]
                   
     def __init__(self, addr    : int, 
                        mnem    : str, 
@@ -33,22 +33,22 @@ class Instruction:
 
         # automatous get instruction symbol rather than outer argu pass
         symbol = pwnxy.symbol.get(addr)
-        self.__symbol = str(symbol) if symbol else ""
+        self.__symbol = str(symbol) or ""
 
 
         
     # TEMP
-    def gettype(self) -> insttype:
+    def gettype(self) -> inst_type:
         if self.mnem.startswith("j"):
             if self.mnem.startswith("jmp"):
-                return insttype.DIRE_BRA
-            return insttype.COND_BRA
+                return inst_type.DIRE_BRA
+            return inst_type.COND_BRA
         elif self.mnem == "ret":
-            return insttype.RET
+            return inst_type.RET
         elif self.mnem == "call":
-            return insttype.CALL
+            return inst_type.CALL
         else:
-            return insttype.OTHER
+            return inst_type.OTHER
     @property
     def is_taken(self) -> bool:
         # TODO:
@@ -81,6 +81,7 @@ class Instruction:
                 tmp = self.__operand.split()[0].strip()
                 if all(x in "x1234567890abcdef" for x in tmp):# TEMP: remedy 
                     self.__dest = Address(self.__operand.split()[0].strip())
+
         return self.__dest
         
     @property
@@ -113,26 +114,26 @@ class Instruction:
         '''
         whether is a conditional branch instruction
         '''
-        return self.__insttype == insttype.COND_BRA
+        return self.__insttype == inst_type.COND_BRA
     @property
     def is_dire_branch(self) -> bool :
         '''
         whether is a direct branch instruction
         '''
-        return self.__insttype == insttype.DIRE_BRA
+        return self.__insttype == inst_type.DIRE_BRA
 
     @property
     def is_call(self) -> bool :
         '''
         whether is a call instruction
         '''
-        return self.__insttype == insttype.CALL
+        return self.__insttype == inst_type.CALL
     @property
     def is_ret(self) -> bool :
         '''
         whether is a ret instruction
         '''
-        return self.__insttype == insttype.RET    
+        return self.__insttype == inst_type.RET    
     @property
     def branch_dest(self) -> Address :
         '''

@@ -4,7 +4,7 @@ from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
 import pwnxy.file
 from pwnxy.cmds import (Cmd, register)
 from pwnxy.utils.debugger import (unwrap, assert_eq, assert_ne, todo)
-from pwnxy.utils.output import (err_print_exc ,xy_print, info, err, note, dbg)
+from pwnxy.utils.output import (err_print_exc, info, err, note, dbg)
 from pwnxy.utils.color import Color
 from pwnxy.utils.hightlight import highlight_src
 from pwnxy.utils.decorator import (deprecated, )
@@ -12,6 +12,7 @@ import gdb
 from pwnxy.ui import banner
 from pwnxy.config.parameters import Parameter
 from collections import defaultdict
+from pwnxy.address import Address
 import re
 
 class Symbol:
@@ -19,18 +20,26 @@ class Symbol:
         self.__sym    : str = sym
         self.__offset : int = offset
 
+    # TEMP:
     def __str__(self): # TODO: if offset is 0 return `<sym>` rather than `<sym+0>`
-        return "<" + self.__sym + "+" + str(self.__offset) + ">"
+        bracket = "angle"
+        if bracket == "angle":
+            return "<" + self.__sym + "+" + str(self.__offset) + ">"
+        elif bracket == "parenthese":
+            return "(" + self.__sym + "+" + str(self.__offset) + ")"
+        else:
+            raise NotImplementedError
 
     @property
     def sym(self) :
         return self.__sym
+
     @property
     def offset(self) :
         return self.__offset
     
     ...
-
+# can memorize here by a decoretor (refer pwndbg)
 def get(obj : Union[str, int]) -> Optional[Union[Type["Symbol"], int]]:
     '''TEMP:
     if obj is a address(int repr), then return a Symbol class
@@ -125,7 +134,6 @@ def add_debug_dir(dir : str) -> None:
         set_debug_dir("%s:%s" % (dir, cur))
     else:
         set_debug_dir(dir)
-
 
 
 

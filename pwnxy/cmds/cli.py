@@ -5,7 +5,7 @@ from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
 import pwnxy.file
 from pwnxy.cmds import (Cmd, register, AliasCmd)
 from pwnxy.utils.debugger import (unwrap, assert_eq, assert_ne, todo)
-from pwnxy.utils.output import (err_print_exc, xy_print, info, err, note, dbg, warn)
+from pwnxy.utils.output import (err_print_exc, info, err, note, dbg, warn)
 from pwnxy.utils.color import Color
 from pwnxy.utils.hightlight import highlight_src
 import gdb
@@ -42,7 +42,7 @@ class Cli(Cmd):
     syntax   = 'cli [cli op] [cli name] [section] (on|off)'
     examples = (
         "cli set r regs on",
-        "cli set b bt off",
+        "cli set b mm on       (cli terminal named named b, relay monitor memory on)",
         "cli show",
     )
 
@@ -93,8 +93,14 @@ class Cli(Cmd):
         
         cliname, sec, op = (argv[i] for i in range(argn))
         # TODO cliname not used
-        ctxobj : Type["Context"] = gcm.getobj("context")
-        ctxobj.ctx_cli_set(sec, op, cliname)
+        if sec != "mm":
+            ctxobj : Type["Context"] = gcm.getobj("context")
+            assert ctxobj is not None # TODO: error handle (cuz user input)
+            ctxobj.ctx_cli_set(sec, op, cliname)
+        else:
+            mmobj = gcm.getobj("monitormem")
+            assert mmobj is not None
+            mmobj.mm_cli_set(cliname)
 
     @enable_decorater
     def show(self, argv : List[str]) -> None:
@@ -156,7 +162,7 @@ class Cli(Cmd):
         self.enabled = False
         note("cli off")
 
-    ops2f = {
+    ops2f = { # TODO: construct ,simplify some operation
         "set" : set  , 
         "show": show , 
         "on"  : on   , 
@@ -177,8 +183,10 @@ class Cli(Cmd):
 
         op, argv = argv[0], argv[1:]
         # TODO: ops move
-        if op not in self.ops2f:
-            warn("op must in (%s)" %(",".join([k for k, _ in self.ops2f.items()])))
+        optab = [k for k, _ in self.ops2f.items()] # optimize here
+        if op not in optab:
+            warn("op must in (%s), but found `%s`" %(",".join(optab), op))
+            return 
         
         self.ops2f[op](self, argv)
 

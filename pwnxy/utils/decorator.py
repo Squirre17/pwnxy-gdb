@@ -23,7 +23,7 @@ def only_if_running(func : Callable) -> Callable:
 def deprecated(func : Callable) -> Callable:
     @functools.wraps(func)
     def wrapper(*args, **kwargs) -> Any:
-        print(Color.redify("WARNING : this function have been deprecated"))
+        print(Color.redify(f"WARNING : this function `{func}` have been deprecated"))
         return func(*args, **kwargs)
     return wrapper
 

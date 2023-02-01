@@ -9,7 +9,7 @@ from typing import (Any, ByteString, Callable, Dict, Generator, Iterable,
 import pwnxy.file
 from pwnxy.cmds import (Cmd, register, AliasCmd)
 from pwnxy.utils.debugger import (unwrap, assert_eq, assert_ne, todo)
-from pwnxy.utils.output import (err_print_exc, xy_print, info, err, note, dbg, warn)
+from pwnxy.utils.output import (err_print_exc, info, err, note, dbg, warn)
 from pwnxy.utils.color import Color
 from pwnxy.utils.hightlight import highlight_src
 import gdb
@@ -51,7 +51,6 @@ class MemoryMonitor(Monitor):
                 (pwnxy.memory.read(address + i * wordlen, wordlen), False) 
                 for i in range(count)
             ]
-            dbg(f"hash is {self.__hash}")
 
         @property
         def address(self): return self.__address

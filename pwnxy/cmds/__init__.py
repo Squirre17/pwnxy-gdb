@@ -134,17 +134,17 @@ class AliasCmd(gdb.Command):
 
 
 # TODO: mv to manager
-@DeprecationWarning
-class PwnxyCmd:
-    # TODO: Maybe load task delegate top Cmd class??
-    # NOTE: instantiate all registered class
-    def __inst_all__(self):
-        '''
-        Load all cmd to gdb
-        '''
-        args = []
-        for rcc in __registered_cmds_cls__:
-            rcc()
+# @DeprecationWarning
+# class PwnxyCmd:
+#     # TODO: Maybe load task delegate top Cmd class??
+#     # NOTE: instantiate all registered class
+#     def __inst_all__(self):
+#         '''
+#         Load all cmd to gdb
+#         '''
+#         args = []
+#         for rcc in __registered_cmds_cls__:
+#             rcc()
 
 # TODO: seemings sloppy : This function should be used as ``argparse.ArgumentParser`` .add_argument method's `type` helper
 def gdb_parse(s : str):
