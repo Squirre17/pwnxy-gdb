@@ -29,7 +29,7 @@ import pwnxy.registers
 import pwnxy.memory 
 import pwnxy.vmmap
 import pwnxy.symbol
-import pwnxy.hignlight as hl
+import pwnxy.highlight as hl
 from pwnxy.disasm import disassembler
 from pwnxy.symbol import Symbol
 

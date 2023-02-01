@@ -111,7 +111,7 @@ from pwnxy.types import typeset
 import pwnxy.memory
 print(hex(pwnxy.memory.deref(0x7fffffffd908, typeset.ppvoid)))
 # print(gdb.lookup_type("ubyte"))
-from pwnxy.hignlight import asm
+from pwnxy.highlight import asm
 print(asm("mov edi,eax"))
 # ------ ---------- ------
 
